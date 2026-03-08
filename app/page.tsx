@@ -32,7 +32,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen relative bg-background flex w-full flex-col lg:flex-row max-w-[1600px] mx-auto overflow-hidden selection:bg-[#106efd]/30">
+    <div className="min-h-screen bg-background flex w-full">
       <DesktopSidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -40,14 +40,13 @@ export default function App() {
         isGuest={isGuest}
       />
 
-      <main className="flex-1 flex flex-col h-screen overflow-y-auto w-full relative pb-16 lg:pb-0 scrollbar-hide bg-muted/10">
-        {/* Vistas principales */}
-        <div className="w-full flex-1">
+      <main className="flex-1 flex flex-col h-screen overflow-y-auto scrollbar-hide">
+        <div className="flex-1">
           {activeTab === "inicio" && <HomeTab onAddToCart={handleAddToCart} />}
           {activeTab === "cuenta" && <AccountTab isGuest={isGuest} onLogout={handleLogout} />}
 
-          {/* Vista Móvil del Carrito */}
-          <div className="lg:hidden h-full w-full">
+          {/* Mobile Cart View */}
+          <div className="lg:hidden">
             {activeTab === "pedido" && (
               <OrderTab
                 cart={cart}
@@ -60,7 +59,8 @@ export default function App() {
         </div>
       </main>
 
-      <aside className="w-[400px] bg-card border-l border-border h-screen sticky top-0 hidden lg:flex flex-col shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.1)] z-20">
+      {/* Desktop Cart Panel */}
+      <aside className="w-80 bg-card border-l border-border h-screen sticky top-0 hidden lg:flex flex-col">
         <OrderTab
           cart={cart}
           onUpdateQuantity={handleUpdateQuantity}

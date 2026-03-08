@@ -14,8 +14,8 @@ export function BottomNav({ activeTab, onTabChange, cartCount }: BottomNavProps)
     ]
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border px-6 pb-safe z-50 lg:hidden">
-            <div className="flex justify-around items-center h-20 max-w-md mx-auto">
+        <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-4 pb-safe z-50 lg:hidden">
+            <div className="flex justify-around items-center h-16 max-w-md mx-auto">
                 {tabs.map((tab) => {
                     const Icon = tab.icon
                     const isActive = activeTab === tab.id
@@ -24,19 +24,21 @@ export function BottomNav({ activeTab, onTabChange, cartCount }: BottomNavProps)
                         <button
                             key={tab.id}
                             onClick={() => onTabChange(tab.id)}
-                            className={`flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-300 w-20 
-                ${isActive ? "text-[#106efd]" : "text-muted-foreground hover:text-foreground"}`}
+                            className={`flex flex-col items-center justify-center gap-1 py-2 px-4 rounded-lg transition-colors ${
+                                isActive 
+                                    ? "text-foreground" 
+                                    : "text-muted-foreground hover:text-foreground"
+                            }`}
                         >
                             <div className="relative">
-                                <div className={`absolute inset-0 bg-[#106efd]/10 rounded-xl transition-all duration-300 transform ${isActive ? "scale-100 opacity-100" : "scale-50 opacity-0"} -m-3`} />
-                                <Icon className={`h-6 w-6 relative z-10 transition-transform duration-300 ${isActive ? "transform -translate-y-1" : ""}`} />
+                                <Icon className="h-5 w-5" />
                                 {tab.id === "pedido" && cartCount > 0 && (
-                                    <span className="absolute -top-2 -right-3 h-[18px] min-w-[18px] px-1 rounded-full bg-[#40cfde] text-white text-[10px] flex items-center justify-center font-black shadow-sm z-20">
+                                    <span className="absolute -top-1.5 -right-1.5 h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-medium">
                                         {cartCount}
                                     </span>
                                 )}
                             </div>
-                            <span className={`text-[11px] mt-1 font-bold transition-all duration-300 ${isActive ? "opacity-100 transform translate-y-0" : "opacity-0 transform translate-y-1 absolute"}`}>
+                            <span className="text-[11px] font-medium">
                                 {tab.label}
                             </span>
                         </button>

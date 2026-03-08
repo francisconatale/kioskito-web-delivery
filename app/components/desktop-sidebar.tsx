@@ -1,5 +1,5 @@
-import { Home, User, Settings } from "lucide-react"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { Home, User, LogOut, LogIn, Moon, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
 
 export function DesktopSidebar({
     activeTab,
@@ -12,46 +12,61 @@ export function DesktopSidebar({
     onLogout: () => void
     isGuest: boolean
 }) {
+    const { theme, setTheme } = useTheme()
+
     return (
-        <aside className="w-[280px] bg-card border-r border-border h-screen sticky top-0 flex flex-col hidden lg:flex">
-            <div className="p-6">
-                <h1 className="text-3xl font-extrabold bg-gradient-to-r from-[#106efd] to-[#40cfde] bg-clip-text text-transparent">
+        <aside className="w-64 bg-card border-r border-border h-screen sticky top-0 flex-col hidden lg:flex">
+            {/* Logo */}
+            <div className="h-16 flex items-center px-6 border-b border-border">
+                <h1 className="text-xl font-semibold tracking-tight">
                     Kioskito
                 </h1>
             </div>
 
-            <nav className="flex-1 px-4 py-6 space-y-2">
+            {/* Navigation */}
+            <nav className="flex-1 p-4 space-y-1">
                 <button
                     onClick={() => onTabChange("inicio")}
-                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-2xl font-bold transition-all ${activeTab === "inicio" ? "bg-[#106efd] text-white shadow-md" : "text-muted-foreground hover:bg-muted"
-                        }`}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                        activeTab === "inicio" 
+                            ? "bg-primary text-primary-foreground" 
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
                 >
-                    <Home className="h-5 w-5" />
+                    <Home className="h-4 w-4" />
                     Inicio
                 </button>
 
                 <button
                     onClick={() => onTabChange("cuenta")}
-                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-2xl font-bold transition-all ${activeTab === "cuenta" ? "bg-[#106efd] text-white shadow-md" : "text-muted-foreground hover:bg-muted"
-                        }`}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                        activeTab === "cuenta" 
+                            ? "bg-primary text-primary-foreground" 
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
                 >
-                    <User className="h-5 w-5" />
+                    <User className="h-4 w-4" />
                     Mi Cuenta
                 </button>
             </nav>
 
-            <div className="p-6 border-t border-border mt-auto">
-                <div className="flex items-center justify-between bg-muted/50 p-4 rounded-3xl mb-4">
-                    <span className="text-sm font-semibold">Tema</span>
-                    <ThemeToggle />
-                </div>
+            {/* Footer */}
+            <div className="p-4 border-t border-border space-y-1">
+                <button
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                >
+                    <Sun className="h-4 w-4 rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
+                    <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
+                    <span className="ml-4">Cambiar tema</span>
+                </button>
 
                 <button
                     onClick={onLogout}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-destructive hover:bg-destructive/10 transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 >
-                    <Settings className="h-5 w-5" />
-                    {isGuest ? "Iniciar Sesión" : "Cerrar Sesión"}
+                    {isGuest ? <LogIn className="h-4 w-4" /> : <LogOut className="h-4 w-4" />}
+                    {isGuest ? "Iniciar Sesion" : "Cerrar Sesion"}
                 </button>
             </div>
         </aside>
