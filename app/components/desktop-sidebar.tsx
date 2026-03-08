@@ -1,5 +1,4 @@
-import { Home, User, LogOut, LogIn, Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
+import { Home, User, LogOut, LogIn, ClipboardList } from "lucide-react"
 
 export function DesktopSidebar({
     activeTab,
@@ -12,25 +11,19 @@ export function DesktopSidebar({
     onLogout: () => void
     isGuest: boolean
 }) {
-    const { theme, setTheme } = useTheme()
-
     return (
-        <aside className="w-64 bg-card border-r border-border h-screen sticky top-0 flex-col hidden lg:flex">
-            {/* Logo */}
-            <div className="h-16 flex items-center px-6 border-b border-border">
-                <h1 className="text-xl font-semibold tracking-tight">
-                    Kioskito
-                </h1>
+        <aside className="w-56 bg-card border-r border-border h-screen sticky top-0 flex-col hidden lg:flex">
+            <div className="h-14 flex items-center px-4 border-b border-border">
+                <h1 className="font-semibold">Kioskito</h1>
             </div>
 
-            {/* Navigation */}
-            <nav className="flex-1 p-4 space-y-1">
+            <nav className="flex-1 p-3 space-y-0.5">
                 <button
                     onClick={() => onTabChange("inicio")}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
                         activeTab === "inicio" 
-                            ? "bg-primary text-primary-foreground" 
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                            ? "bg-muted text-foreground font-medium" 
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                     }`}
                 >
                     <Home className="h-4 w-4" />
@@ -38,32 +31,34 @@ export function DesktopSidebar({
                 </button>
 
                 <button
+                    onClick={() => onTabChange("pedidos")}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+                        activeTab === "pedidos" 
+                            ? "bg-muted text-foreground font-medium" 
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    }`}
+                >
+                    <ClipboardList className="h-4 w-4" />
+                    Mis Pedidos
+                </button>
+
+                <button
                     onClick={() => onTabChange("cuenta")}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
                         activeTab === "cuenta" 
-                            ? "bg-primary text-primary-foreground" 
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                            ? "bg-muted text-foreground font-medium" 
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                     }`}
                 >
                     <User className="h-4 w-4" />
-                    Mi Cuenta
+                    Cuenta
                 </button>
             </nav>
 
-            {/* Footer */}
-            <div className="p-4 border-t border-border space-y-1">
-                <button
-                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                >
-                    <Sun className="h-4 w-4 rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
-                    <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
-                    <span className="ml-4">Cambiar tema</span>
-                </button>
-
+            <div className="p-3 border-t border-border">
                 <button
                     onClick={onLogout}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
                     {isGuest ? <LogIn className="h-4 w-4" /> : <LogOut className="h-4 w-4" />}
                     {isGuest ? "Iniciar Sesion" : "Cerrar Sesion"}

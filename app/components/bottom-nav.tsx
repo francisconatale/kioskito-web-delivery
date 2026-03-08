@@ -1,15 +1,14 @@
-import { Home, ShoppingBag, User } from "lucide-react"
+import { Home, ClipboardList, User } from "lucide-react"
 
 interface BottomNavProps {
     activeTab: string
     onTabChange: (tab: string) => void
-    cartCount: number
 }
 
-export function BottomNav({ activeTab, onTabChange, cartCount }: BottomNavProps) {
+export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
     const tabs = [
         { id: "inicio", label: "Inicio", icon: Home },
-        { id: "pedido", label: "Pedido", icon: ShoppingBag },
+        { id: "pedidos", label: "Mis Pedidos", icon: ClipboardList },
         { id: "cuenta", label: "Cuenta", icon: User },
     ]
 
@@ -30,14 +29,7 @@ export function BottomNav({ activeTab, onTabChange, cartCount }: BottomNavProps)
                                     : "text-muted-foreground hover:text-foreground"
                             }`}
                         >
-                            <div className="relative">
-                                <Icon className="h-5 w-5" />
-                                {tab.id === "pedido" && cartCount > 0 && (
-                                    <span className="absolute -top-1.5 -right-1.5 h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-medium">
-                                        {cartCount}
-                                    </span>
-                                )}
-                            </div>
+                            <Icon className="h-5 w-5" />
                             <span className="text-[11px] font-medium">
                                 {tab.label}
                             </span>
