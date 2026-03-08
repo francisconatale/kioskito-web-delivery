@@ -1,12 +1,15 @@
 "use client"
 
+import { useState } from "react"
 import { useAppState } from "./hooks/use-app-state"
 import { AuthScreen } from "./components/auth-screen"
 import { HomeTab } from "./components/home-tab"
-import { OrderTab } from "./components/order-tab"
+import { OrdersTab } from "./components/orders-tab"
 import { AccountTab } from "./components/account-tab"
 import { BottomNav } from "./components/bottom-nav"
 import { DesktopSidebar } from "./components/desktop-sidebar"
+import { FloatingCart } from "./components/floating-cart"
+import { CheckoutView } from "./components/checkout-view"
 
 export default function App() {
   const {
@@ -15,11 +18,12 @@ export default function App() {
     activeTab,
     setActiveTab,
     cart,
-    cartCount,
     handleAddToCart,
     handleUpdateQuantity,
     handleCheckout
   } = useAppState()
+
+  const [showCheckout, setShowCheckout] = useState(false)
 
   if (authState === "login") {
     return <AuthScreen onLogin={() => setAuthState("authenticated")} onGuest={() => setAuthState("guest")} />
@@ -31,8 +35,26 @@ export default function App() {
     setActiveTab("inicio")
   }
 
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
+  const handleConfirmOrder = () => {
+    handleCheckout()
+    setShowCheckout(false)
+  }
+
+  if (showCheckout) {
+    return (
+      <CheckoutView
+        cart={cart}
+        onUpdateQuantity={handleUpdateQuantity}
+        onConfirm={handleConfirmOrder}
+        onBack={() => setShowCheckout(false)}
+      />
+    )
+  }
+
   return (
-    <div className="min-h-screen relative bg-background flex w-full flex-col lg:flex-row max-w-[1600px] mx-auto overflow-hidden selection:bg-[#106efd]/30">
+    <div className="min-h-screen bg-background flex w-full">
       <DesktopSidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -40,39 +62,23 @@ export default function App() {
         isGuest={isGuest}
       />
 
-      <main className="flex-1 flex flex-col h-screen overflow-y-auto w-full relative pb-16 lg:pb-0 scrollbar-hide bg-muted/10">
-        {/* Vistas principales */}
-        <div className="w-full flex-1">
-          {activeTab === "inicio" && <HomeTab onAddToCart={handleAddToCart} />}
-          {activeTab === "cuenta" && <AccountTab isGuest={isGuest} onLogout={handleLogout} />}
-
-          {/* Vista Móvil del Carrito */}
-          <div className="lg:hidden h-full w-full">
-            {activeTab === "pedido" && (
-              <OrderTab
-                cart={cart}
-                onUpdateQuantity={handleUpdateQuantity}
-                onCheckout={handleCheckout}
-                isDesktop={false}
-              />
-            )}
-          </div>
-        </div>
+      <main className="flex-1 h-screen overflow-y-auto scrollbar-hide">
+        {activeTab === "inicio" && <HomeTab onAddToCart={handleAddToCart} />}
+        {activeTab === "pedidos" && <OrdersTab />}
+        {activeTab === "cuenta" && <AccountTab isGuest={isGuest} onLogout={handleLogout} />}
       </main>
 
-      <aside className="w-[400px] bg-card border-l border-border h-screen sticky top-0 hidden lg:flex flex-col shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.1)] z-20">
-        <OrderTab
-          cart={cart}
-          onUpdateQuantity={handleUpdateQuantity}
-          onCheckout={handleCheckout}
-          isDesktop={true}
+      {activeTab === "inicio" && (
+        <FloatingCart 
+          cart={cart} 
+          total={total} 
+          onCheckout={() => setShowCheckout(true)} 
         />
-      </aside>
+      )}
 
       <BottomNav
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        cartCount={cartCount}
       />
     </div>
   )

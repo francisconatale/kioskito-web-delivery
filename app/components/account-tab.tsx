@@ -1,7 +1,5 @@
-import { User, ShoppingBag, MapPin, Sun, ChevronDown } from "lucide-react"
+import { User, ShoppingBag, MapPin, Settings, ChevronRight, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { ThemeToggle } from "@/components/theme-toggle"
 
 interface AccountTabProps {
     isGuest: boolean
@@ -11,19 +9,26 @@ interface AccountTabProps {
 export function AccountTab({ isGuest, onLogout }: AccountTabProps) {
     if (isGuest) {
         return (
-            <div className="pb-24 pt-12 px-6 flex flex-col items-center justify-center text-center min-h-[60vh] max-w-lg mx-auto">
-                <div className="w-24 h-24 bg-gradient-to-br from-muted to-muted/50 rounded-full flex items-center justify-center mb-6 shadow-inner">
+            <div className="pb-24 px-6 flex flex-col items-center justify-center text-center min-h-[60vh] max-w-sm mx-auto">
+                <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-6">
                     <User className="h-10 w-10 text-muted-foreground" />
                 </div>
-                <h2 className="text-3xl font-bold text-foreground mb-3">Descubre más</h2>
-                <p className="text-muted-foreground mb-10 text-lg">Para ver tu historial de pedidos, guardar direcciones favoritas y ganar puntos.</p>
+                <h2 className="text-2xl font-semibold tracking-tight mb-2">
+                    Inicia sesion
+                </h2>
+                <p className="text-muted-foreground mb-8">
+                    Accede a tu historial de pedidos, direcciones guardadas y mas.
+                </p>
                 <Button
-                    className="w-full h-14 bg-gradient-to-r from-[#106efd] to-[#40cfde] text-white rounded-2xl font-bold text-lg hover:shadow-lg transition-all hover:scale-[1.02]"
+                    className="w-full h-11"
                     onClick={onLogout}
                 >
-                    Iniciar sesión
+                    Iniciar sesion
                 </Button>
-                <Button variant="ghost" className="mt-4 font-semibold text-muted-foreground hover:text-foreground">
+                <Button 
+                    variant="ghost" 
+                    className="mt-3 text-muted-foreground"
+                >
                     Crear cuenta nueva
                 </Button>
             </div>
@@ -33,76 +38,78 @@ export function AccountTab({ isGuest, onLogout }: AccountTabProps) {
     return (
         <div className="pb-24 max-w-xl mx-auto w-full">
             {/* Header */}
-            <div className="bg-gradient-to-br from-[#106efd] to-[#40cfde] px-6 pt-6 pb-12 rounded-b-[3xl] shadow-md relative overflow-hidden">
-                {/* Decorative elements */}
-                <div className="absolute top-[-20px] right-[-20px] w-40 h-40 bg-white/10 rounded-full blur-2xl" />
-
-                <div className="flex items-center justify-between mb-8 relative z-10">
-                    <h1 className="text-2xl font-black text-white tracking-tight">Mi Perfil</h1>
-                    <ThemeToggle variant="header" />
+            <header className="border-b border-border bg-card/50 backdrop-blur-sm">
+                <div className="px-6 h-16 flex items-center">
+                    <h1 className="text-lg font-semibold">Mi Cuenta</h1>
                 </div>
+            </header>
 
-                <div className="flex items-center gap-5 relative z-10">
-                    <div className="h-20 w-20 rounded-full bg-white flex items-center justify-center p-1 shadow-lg shadow-black/10">
-                        <div className="h-full w-full rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                            <User className="h-8 w-8 text-slate-400" />
-                        </div>
+            {/* Profile */}
+            <div className="px-6 py-8">
+                <div className="flex items-center gap-4">
+                    <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
+                        <User className="h-8 w-8 text-muted-foreground" />
                     </div>
                     <div>
-                        <h2 className="font-extrabold text-white text-2xl">Usuario Demo</h2>
-                        <p className="font-medium text-white/80">usuario@email.com</p>
-                        <div className="mt-2 inline-flex items-center bg-white/20 rounded-full px-3 py-1">
-                            <span className="text-xs font-bold text-white uppercase tracking-wider">🌟 1.250 Puntos</span>
-                        </div>
+                        <h2 className="font-semibold text-lg">Usuario Demo</h2>
+                        <p className="text-sm text-muted-foreground">usuario@email.com</p>
                     </div>
                 </div>
             </div>
 
-            <div className="px-4 -mt-6 relative z-20 space-y-3">
+            {/* Menu */}
+            <div className="px-4 space-y-1">
                 <MenuItem
-                    icon={<ShoppingBag className="h-5 w-5 text-[#40cfde]" />}
+                    icon={<ShoppingBag className="h-5 w-5" />}
                     title="Historial de Pedidos"
-                    description="Repite tus pedidos anteriores"
-                    bgColor="bg-[#40cfde]/10"
+                    description="Ver pedidos anteriores"
                 />
 
                 <MenuItem
-                    icon={<MapPin className="h-5 w-5 text-[#106efd]" />}
-                    title="Tus Direcciones"
-                    description="Gestiona dónde enviamos tu comida"
-                    bgColor="bg-[#106efd]/10"
+                    icon={<MapPin className="h-5 w-5" />}
+                    title="Direcciones"
+                    description="Gestionar direcciones de entrega"
                 />
 
                 <MenuItem
-                    icon={<Sun className="h-5 w-5 text-amber-500" />}
-                    title="Configuración"
+                    icon={<Settings className="h-5 w-5" />}
+                    title="Configuracion"
                     description="Preferencias y notificaciones"
-                    bgColor="bg-amber-500/10"
                 />
 
-                <Card className="border-border/50 shadow-sm cursor-pointer hover:bg-muted/50 transition-colors mt-8 rounded-2xl group" onClick={onLogout}>
-                    <CardContent className="p-4 flex items-center justify-center gap-2 text-destructive">
-                        <h3 className="font-bold">Cerrar Sesión</h3>
-                    </CardContent>
-                </Card>
+                <div className="pt-4">
+                    <button
+                        onClick={onLogout}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    >
+                        <LogOut className="h-5 w-5" />
+                        Cerrar Sesion
+                    </button>
+                </div>
             </div>
         </div>
     )
 }
 
-function MenuItem({ icon, title, description, bgColor }: { icon: React.ReactNode, title: string, description: string, bgColor: string }) {
+function MenuItem({ 
+    icon, 
+    title, 
+    description 
+}: { 
+    icon: React.ReactNode
+    title: string
+    description: string 
+}) {
     return (
-        <Card className="border-border/50 shadow-sm cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all rounded-2xl">
-            <CardContent className="p-4 flex items-center gap-4">
-                <div className={`h-12 w-12 rounded-2xl ${bgColor} flex items-center justify-center shrink-0`}>
-                    {icon}
-                </div>
-                <div className="flex-1">
-                    <h3 className="font-bold text-foreground">{title}</h3>
-                    <p className="text-xs text-muted-foreground font-medium">{description}</p>
-                </div>
-                <ChevronDown className="h-5 w-5 text-muted-foreground/50 -rotate-90 shrink-0" />
-            </CardContent>
-        </Card>
+        <button className="w-full flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-muted transition-colors text-left">
+            <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center text-muted-foreground flex-shrink-0">
+                {icon}
+            </div>
+            <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-sm">{title}</h3>
+                <p className="text-xs text-muted-foreground">{description}</p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        </button>
     )
 }

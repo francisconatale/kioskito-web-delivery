@@ -1,5 +1,4 @@
-import { Home, User, Settings } from "lucide-react"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { Home, User, LogOut, LogIn, ClipboardList } from "lucide-react"
 
 export function DesktopSidebar({
     activeTab,
@@ -13,45 +12,56 @@ export function DesktopSidebar({
     isGuest: boolean
 }) {
     return (
-        <aside className="w-[280px] bg-card border-r border-border h-screen sticky top-0 flex flex-col hidden lg:flex">
-            <div className="p-6">
-                <h1 className="text-3xl font-extrabold bg-gradient-to-r from-[#106efd] to-[#40cfde] bg-clip-text text-transparent">
-                    Kioskito
-                </h1>
+        <aside className="w-56 bg-card border-r border-border h-screen sticky top-0 flex-col hidden lg:flex">
+            <div className="h-14 flex items-center px-4 border-b border-border">
+                <h1 className="font-semibold">Kioskito</h1>
             </div>
 
-            <nav className="flex-1 px-4 py-6 space-y-2">
+            <nav className="flex-1 p-3 space-y-0.5">
                 <button
                     onClick={() => onTabChange("inicio")}
-                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-2xl font-bold transition-all ${activeTab === "inicio" ? "bg-[#106efd] text-white shadow-md" : "text-muted-foreground hover:bg-muted"
-                        }`}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+                        activeTab === "inicio" 
+                            ? "bg-muted text-foreground font-medium" 
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    }`}
                 >
-                    <Home className="h-5 w-5" />
+                    <Home className="h-4 w-4" />
                     Inicio
                 </button>
 
                 <button
-                    onClick={() => onTabChange("cuenta")}
-                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-2xl font-bold transition-all ${activeTab === "cuenta" ? "bg-[#106efd] text-white shadow-md" : "text-muted-foreground hover:bg-muted"
-                        }`}
+                    onClick={() => onTabChange("pedidos")}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+                        activeTab === "pedidos" 
+                            ? "bg-muted text-foreground font-medium" 
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    }`}
                 >
-                    <User className="h-5 w-5" />
-                    Mi Cuenta
+                    <ClipboardList className="h-4 w-4" />
+                    Mis Pedidos
+                </button>
+
+                <button
+                    onClick={() => onTabChange("cuenta")}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+                        activeTab === "cuenta" 
+                            ? "bg-muted text-foreground font-medium" 
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    }`}
+                >
+                    <User className="h-4 w-4" />
+                    Cuenta
                 </button>
             </nav>
 
-            <div className="p-6 border-t border-border mt-auto">
-                <div className="flex items-center justify-between bg-muted/50 p-4 rounded-3xl mb-4">
-                    <span className="text-sm font-semibold">Tema</span>
-                    <ThemeToggle />
-                </div>
-
+            <div className="p-3 border-t border-border">
                 <button
                     onClick={onLogout}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-destructive hover:bg-destructive/10 transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
-                    <Settings className="h-5 w-5" />
-                    {isGuest ? "Iniciar Sesión" : "Cerrar Sesión"}
+                    {isGuest ? <LogIn className="h-4 w-4" /> : <LogOut className="h-4 w-4" />}
+                    {isGuest ? "Iniciar Sesion" : "Cerrar Sesion"}
                 </button>
             </div>
         </aside>
