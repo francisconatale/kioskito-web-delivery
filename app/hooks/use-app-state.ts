@@ -14,7 +14,7 @@ export function useAppState() {
                     item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
                 )
             }
-            return [...prev, { id: product.id, name: product.name, price: product.price, quantity: 1 }]
+            return [...prev, { id: product.id, name: product.nombre, price: product.precioVenta, quantity: 1 }]
         })
     }
 

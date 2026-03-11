@@ -2,7 +2,9 @@ import { useState } from "react"
 import { Search, MapPin, Plus } from "lucide-react"
 import Image from "next/image"
 import { Input } from "@/components/ui/input"
-import { CATEGORIES, PRODUCTS, Product } from "@/lib/data"
+import { CATEGORIES, Product } from "@/lib/data"
+import { useProducts } from "@/hooks/use-products"
+import { useCategories } from "@/hooks/use-categories"
 
 interface HomeTabProps {
     onAddToCart: (product: Product) => void
@@ -12,9 +14,13 @@ export function HomeTab({ onAddToCart }: HomeTabProps) {
     const [selectedCategory, setSelectedCategory] = useState("all")
     const [searchQuery, setSearchQuery] = useState("")
 
-    const filteredProducts = PRODUCTS.filter((product) => {
-        const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
-        const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    const { products, loading, error } = useProducts()
+    const { categories } = useCategories()
+
+    const filteredProducts = products.filter((product) => {
+        const productCategory = product.categoria?.toUpperCase() || ""
+        const matchesCategory = selectedCategory === "all" || productCategory === selectedCategory
+        const matchesSearch = product.nombre.toLowerCase().includes(searchQuery.toLowerCase())
         return matchesCategory && matchesSearch
     })
 
@@ -47,23 +53,41 @@ export function HomeTab({ onAddToCart }: HomeTabProps) {
                 {/* Categories */}
                 <div className="mb-6">
                     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                    {CATEGORIES.map((cat) => (
                         <button
-                            key={cat.id}
-                            onClick={() => setSelectedCategory(cat.id)}
+                            onClick={() => setSelectedCategory("all")}
                             className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors ${
-                                selectedCategory === cat.id
+                                selectedCategory === "all"
                                     ? "bg-foreground text-background"
                                     : "bg-muted text-muted-foreground hover:text-foreground"
                             }`}
                         >
-                            {cat.name}
+                            Todos
                         </button>
-                    ))}
-                </div>
+                        {categories.map((cat) => (
+                            <button
+                                key={cat.id}
+                                onClick={() => setSelectedCategory(cat.nombre.toUpperCase())}
+                                className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors ${
+                                    selectedCategory === cat.nombre.toUpperCase()
+                                        ? "bg-foreground text-background"
+                                        : "bg-muted text-muted-foreground hover:text-foreground"
+                                }`}
+                            >
+                                {cat.nombre}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
-                {filteredProducts.length === 0 ? (
+                {loading ? (
+                    <div className="text-center py-12">
+                        <p className="text-muted-foreground text-sm">Cargando productos...</p>
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-12 text-destructive">
+                        <p className="text-sm">{error}</p>
+                    </div>
+                ) : filteredProducts.length === 0 ? (
                     <div className="text-center py-12">
                         <p className="text-muted-foreground text-sm">No se encontraron productos.</p>
                     </div>
@@ -74,23 +98,29 @@ export function HomeTab({ onAddToCart }: HomeTabProps) {
                                 key={product.id} 
                                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
                             >
-                                <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-md bg-muted">
-                                    <Image
-                                        src={product.image}
-                                        alt={product.name}
-                                        fill
-                                        className="object-cover"
-                                    />
+                                <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-md bg-muted flex items-center justify-center">
+                                    {product.image ? (
+                                        <Image
+                                            src={product.image}
+                                            alt={product.nombre}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    ) : (
+                                        <span className="text-2xl">📦</span>
+                                    )}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <h4 className="text-sm font-medium">{product.name}</h4>
-                                    <p className="text-xs text-muted-foreground mt-0.5">{product.description}</p>
+                                    <h4 className="text-sm font-medium">{product.nombre}</h4>
+                                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                                        {product.descripcion || "Sin descripción"}
+                                    </p>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <span className="text-sm font-medium">${product.price.toFixed(2)}</span>
+                                    <span className="text-sm font-medium">${product.precioVenta?.toFixed(2)}</span>
                                     <button
                                         onClick={() => onAddToCart(product)}
-                                        className="h-8 w-8 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
+                                        className="h-8 w-8 rounded-full bg-primary hover:bg-primary/80 text-primary-foreground flex items-center justify-center transition-colors shadow-sm"
                                     >
                                         <Plus className="h-4 w-4" />
                                     </button>
