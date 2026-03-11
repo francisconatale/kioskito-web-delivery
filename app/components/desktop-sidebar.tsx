@@ -1,16 +1,15 @@
 import { Home, User, LogOut, LogIn, ClipboardList } from "lucide-react"
+import { useAuth } from "@/hooks/use-auth"
 
 export function DesktopSidebar({
     activeTab,
-    onTabChange,
-    onLogout,
-    isGuest
+    onTabChange
 }: {
     activeTab: string
     onTabChange: (tab: string) => void
-    onLogout: () => void
-    isGuest: boolean
 }) {
+    const { authState, logout: onLogout } = useAuth()
+    const isGuest = authState === "guest"
     return (
         <aside className="w-56 bg-card border-r border-border h-screen sticky top-0 flex-col hidden lg:flex">
             <div className="h-14 flex items-center px-4 border-b border-border">

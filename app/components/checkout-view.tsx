@@ -1,10 +1,11 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ArrowLeft, Minus, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { CartItem } from "@/lib/data"
 import { usePromotions } from "../hooks/use-promotions"
 import { CheckoutFormData } from "@/hooks/use-checkout"
+import { useAuth } from "@/hooks/use-auth"
 
 interface CheckoutViewProps {
     cart: CartItem[]
@@ -23,15 +24,29 @@ export function CheckoutView({
     isSubmitting,
     error
 }: CheckoutViewProps) {
+    const { user: authUser, authState } = useAuth()
     const { originalTotal, promotionalTotal, appliedPromotions } = usePromotions(cart)
     
     const [formData, setFormData] = useState<CheckoutFormData>({
-        nombreCliente: "",
-        dniCliente: "",
-        telefonoContacto: "",
-        direccionEntrega: "",
+        nombreCliente: authUser?.nombre || "",
+        dniCliente: authUser?.dni || "",
+        telefonoContacto: authUser?.telefono || "",
+        direccionEntrega: authUser?.direccion || "",
         observaciones: ""
     })
+
+    // Update form if user status changes or loads late
+    useEffect(() => {
+        if (authState === "authenticated" && authUser) {
+            setFormData(prev => ({
+                ...prev,
+                nombreCliente: prev.nombreCliente || authUser.nombre || "",
+                dniCliente: prev.dniCliente || authUser.dni || "",
+                telefonoContacto: prev.telefonoContacto || authUser.telefono || "",
+                direccionEntrega: prev.direccionEntrega || authUser.direccion || "",
+            }))
+        }
+    }, [authUser, authState])
 
     const isFormValid = formData.nombreCliente.trim() !== "" && formData.direccionEntrega.trim() !== ""
 

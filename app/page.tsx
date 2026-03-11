@@ -11,11 +11,10 @@ import { DesktopSidebar } from "./components/desktop-sidebar"
 import { FloatingCart } from "./components/floating-cart"
 import { CheckoutView } from "./components/checkout-view"
 import { useCheckout, CheckoutFormData } from "@/hooks/use-checkout"
+import { useAuth } from "@/hooks/use-auth"
 
 export default function App() {
   const {
-    authState,
-    setAuthState,
     activeTab,
     setActiveTab,
     cart,
@@ -24,18 +23,31 @@ export default function App() {
     handleCheckout
   } = useAppState()
 
+  const { authState, setAsGuest, logout, isResolvingAuth } = useAuth()
+
   const [showCheckout, setShowCheckout] = useState(false)
   const { submitOrder, loading: isSubmitting, error: submitError } = useCheckout()
 
+  if (isResolvingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground animate-pulse">Cargando sesión...</p>
+        </div>
+      </div>
+    )
+  }
+
   if (authState === "login") {
-    return <AuthScreen onLogin={() => setAuthState("authenticated")} onGuest={() => setAuthState("guest")} />
+    return <AuthScreen />
   }
 
   const isGuest = authState === "guest"
   const handleLogout = () => {
-    setAuthState("login")
-    setActiveTab("inicio")
+    logout()
   }
+
 
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
@@ -67,14 +79,12 @@ export default function App() {
       <DesktopSidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        onLogout={handleLogout}
-        isGuest={isGuest}
       />
 
       <main className="flex-1 h-screen overflow-y-auto scrollbar-hide">
         {activeTab === "inicio" && <HomeTab onAddToCart={handleAddToCart} />}
         {activeTab === "pedidos" && <OrdersTab />}
-        {activeTab === "cuenta" && <AccountTab isGuest={isGuest} onLogout={handleLogout} />}
+        {activeTab === "cuenta" && <AccountTab onTabChange={setActiveTab} />}
       </main>
 
       {activeTab === "inicio" && (

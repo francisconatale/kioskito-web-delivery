@@ -1,36 +1,44 @@
-import { User, ShoppingBag, MapPin, Settings, ChevronRight, LogOut } from "lucide-react"
+import { User, ShoppingBag, MapPin, Settings, ChevronRight, LogOut, LogIn, UserPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/hooks/use-auth"
 
 interface AccountTabProps {
-    isGuest: boolean
-    onLogout: () => void
+    onTabChange: (tab: string) => void
 }
 
-export function AccountTab({ isGuest, onLogout }: AccountTabProps) {
+export function AccountTab({ onTabChange }: AccountTabProps) {
+    const { user: userInfo, authState, logout, logout: onLogout } = useAuth()
+    const isGuest = authState === "guest"
+
     if (isGuest) {
         return (
             <div className="pb-24 px-6 flex flex-col items-center justify-center text-center min-h-[60vh] max-w-sm mx-auto">
-                <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-6">
-                    <User className="h-10 w-10 text-muted-foreground" />
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                    <User className="h-10 w-10 text-primary" />
                 </div>
-                <h2 className="text-2xl font-semibold tracking-tight mb-2">
-                    Inicia sesion
+                <h2 className="text-2xl font-bold tracking-tight mb-2">
+                    ¡Hola! Identificate
                 </h2>
                 <p className="text-muted-foreground mb-8">
-                    Accede a tu historial de pedidos, direcciones guardadas y mas.
+                    Inicia sesión para ver tus pedidos, editar tu perfil y más.
                 </p>
-                <Button
-                    className="w-full h-11"
-                    onClick={onLogout}
-                >
-                    Iniciar sesion
-                </Button>
-                <Button 
-                    variant="ghost" 
-                    className="mt-3 text-muted-foreground"
-                >
-                    Crear cuenta nueva
-                </Button>
+                <div className="w-full space-y-3">
+                    <Button
+                        className="w-full h-12 flex items-center justify-center gap-2"
+                        onClick={onLogout}
+                    >
+                        <LogIn className="h-4 w-4" />
+                        Iniciar sesión
+                    </Button>
+                    <Button
+                        variant="outline"
+                        className="w-full h-12 flex items-center justify-center gap-2"
+                        onClick={onLogout}
+                    >
+                        <UserPlus className="h-4 w-4" />
+                        Crear cuenta
+                    </Button>
+                </div>
             </div>
         )
     }
@@ -38,7 +46,7 @@ export function AccountTab({ isGuest, onLogout }: AccountTabProps) {
     return (
         <div className="pb-24 max-w-xl mx-auto w-full">
             {/* Header */}
-            <header className="border-b border-border bg-card/50 backdrop-blur-sm">
+            <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
                 <div className="px-6 h-16 flex items-center">
                     <h1 className="text-lg font-semibold">Mi Cuenta</h1>
                 </div>
@@ -47,14 +55,19 @@ export function AccountTab({ isGuest, onLogout }: AccountTabProps) {
             {/* Profile */}
             <div className="px-6 py-8">
                 <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
-                        <User className="h-8 w-8 text-muted-foreground" />
+                    <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                        <User className="h-8 w-8 text-primary" />
                     </div>
                     <div>
-                        <h2 className="font-semibold text-lg">Usuario Demo</h2>
-                        <p className="text-sm text-muted-foreground">usuario@email.com</p>
+                        <h2 className="font-bold text-xl">{userInfo?.nombre || "Cargando..."}</h2>
+                        <p className="text-sm text-muted-foreground">{userInfo?.email}</p>
                     </div>
                 </div>
+                {userInfo?.dni && (
+                    <div className="mt-4 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
+                        DNI: {userInfo.dni}
+                    </div>
+                )}
             </div>
 
             {/* Menu */}
@@ -63,6 +76,7 @@ export function AccountTab({ isGuest, onLogout }: AccountTabProps) {
                     icon={<ShoppingBag className="h-5 w-5" />}
                     title="Historial de Pedidos"
                     description="Ver pedidos anteriores"
+                    onClick={() => onTabChange("pedidos")}
                 />
 
                 <MenuItem
@@ -91,17 +105,22 @@ export function AccountTab({ isGuest, onLogout }: AccountTabProps) {
     )
 }
 
-function MenuItem({ 
-    icon, 
-    title, 
-    description 
-}: { 
+function MenuItem({
+    icon,
+    title,
+    description,
+    onClick
+}: {
     icon: React.ReactNode
     title: string
-    description: string 
+    description: string
+    onClick?: () => void
 }) {
     return (
-        <button className="w-full flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-muted transition-colors text-left">
+        <button 
+            onClick={onClick}
+            className="w-full flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-muted transition-colors text-left"
+        >
             <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center text-muted-foreground flex-shrink-0">
                 {icon}
             </div>

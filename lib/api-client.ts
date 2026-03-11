@@ -65,7 +65,7 @@ export async function handleResponse(response: Response, options: { silent?: boo
 
     const text = await response.text();
     if (!text || !text.trim()) {
-        return null; 
+        return null;
     }
 
     try {
@@ -83,8 +83,7 @@ export async function handleResponse(response: Response, options: { silent?: boo
 }
 
 export function getAuthHeaders(contentType: string = "application/json") {
-    // Delivery app doesn't require auth token mostly, but kept for future if needed
-    const token = typeof window !== 'undefined' ? localStorage.getItem("auth_token") : null;
+    const token = typeof window !== 'undefined' ? sessionStorage.getItem("auth_token") : null;
     return {
         ...(contentType && { "Content-Type": contentType }),
         ...(token && { "Authorization": `Bearer ${token}` })

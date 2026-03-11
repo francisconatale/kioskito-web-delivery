@@ -2,7 +2,6 @@ import { useState } from "react"
 import { CartItem, Product } from "@/lib/data"
 
 export function useAppState() {
-    const [authState, setAuthState] = useState<"login" | "authenticated" | "guest">("login")
     const [activeTab, setActiveTab] = useState("inicio")
     const [cart, setCart] = useState<CartItem[]>([])
 
@@ -33,7 +32,7 @@ export function useAppState() {
     }
 
     const handleCheckout = () => {
-        alert("Pedido confirmado!")
+        // El CheckoutView ya maneja el aviso de exito, aqui solo limpiamos el carrito
         setCart([])
         setActiveTab("inicio")
     }
@@ -41,8 +40,6 @@ export function useAppState() {
     const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
 
     return {
-        authState,
-        setAuthState,
         activeTab,
         setActiveTab,
         cart,
@@ -52,3 +49,5 @@ export function useAppState() {
         handleCheckout
     }
 }
+
+
