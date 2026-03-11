@@ -16,7 +16,7 @@ export function OrderTab({
     onCheckout,
     isDesktop = false
 }: OrderTabProps) {
-    const { originalTotal, promotionalTotal, appliedPromotions } = usePromotions(cart)
+    const { originalTotal, promotionalTotal, appliedPromotions, loading } = usePromotions(cart)
 
     return (
         <div className={`flex flex-col h-full bg-background/50 selection:bg-primary/20 animate-in fade-in duration-300 ${!isDesktop ? "pb-32" : ""}`}>
@@ -119,8 +119,14 @@ export function OrderTab({
                     <Button
                         className="w-full h-12 rounded-2xl font-bold text-base tracking-tight shadow-xl shadow-primary/10 active:scale-[0.98] transition-all hover:shadow-primary/20"
                         onClick={onCheckout}
+                        disabled={loading}
                     >
-                        Confirmar mi Pedido
+                        {loading ? (
+                            <div className="flex items-center gap-2">
+                                <div className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                                Calculando...
+                            </div>
+                        ) : "Confirmar mi Pedido"}
                     </Button>
                 </div>
             )}

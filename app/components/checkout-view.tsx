@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react"
-import { ArrowLeft, Minus, Plus, Trash2 } from "lucide-react"
+import { ArrowLeft, Minus, Plus, Trash2, MapPin, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { CartItem } from "@/lib/data"
 import { usePromotions } from "../hooks/use-promotions"
 import { CheckoutFormData } from "@/hooks/use-checkout"
 import { useAuth } from "@/hooks/use-auth"
+import { addressService, Address } from "@/lib/address-service"
+import { AddressSelection } from "./address-selection"
 
 interface CheckoutViewProps {
     cart: CartItem[]
@@ -25,7 +27,7 @@ export function CheckoutView({
     error
 }: CheckoutViewProps) {
     const { user: authUser, authState } = useAuth()
-    const { originalTotal, promotionalTotal, appliedPromotions } = usePromotions(cart)
+    const { originalTotal, promotionalTotal, appliedPromotions, loading: loadingPromos } = usePromotions(cart)
     
     const [formData, setFormData] = useState<CheckoutFormData>({
         nombreCliente: authUser?.nombre || "",
@@ -34,6 +36,35 @@ export function CheckoutView({
         direccionEntrega: authUser?.direccion || "",
         observaciones: ""
     })
+
+    const [addresses, setAddresses] = useState<Address[]>([])
+    const [loadingAddresses, setLoadingAddresses] = useState(false)
+    const [isUsingNewAddress, setIsUsingNewAddress] = useState(false)
+
+    useEffect(() => {
+        const fetchAddresses = async () => {
+            if (authState === "authenticated") {
+                setLoadingAddresses(true)
+                try {
+                    const data = await addressService.getAddresses()
+                    setAddresses(data)
+                    // Si tiene direcciones, seleccionar la primera por defecto si no hay nada en formData
+                    if (data.length > 0 && !formData.direccionEntrega) {
+                        setFormData(prev => ({ ...prev, direccionEntrega: data[0].direccion }))
+                    } else if (data.length === 0) {
+                        setIsUsingNewAddress(true)
+                    }
+                } catch (error) {
+                    console.error("Error fetching addresses:", error)
+                } finally {
+                    setLoadingAddresses(false)
+                }
+            } else {
+                setIsUsingNewAddress(true)
+            }
+        }
+        fetchAddresses()
+    }, [authState])
 
     useEffect(() => {
         if (authState === "authenticated" && authUser) {
@@ -163,15 +194,52 @@ export function CheckoutView({
                                         />
                                     </div>
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-4">
                                     <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">Dirección de entrega *</label>
-                                    <Input 
-                                        placeholder="Dirección de entrega *" 
-                                        value={formData.direccionEntrega} 
-                                        onChange={(e) => setFormData({...formData, direccionEntrega: e.target.value})} 
-                                        className="h-12 rounded-xl bg-background border-border/50 focus:ring-primary/20"
-                                        required 
-                                    />
+                                    
+                                    {loadingAddresses ? (
+                                        <div className="flex items-center justify-center p-8 bg-background rounded-xl border border-dashed border-border/50">
+                                            <Loader2 className="h-5 w-5 animate-spin text-primary mr-2" />
+                                            <span className="text-sm text-muted-foreground">Cargando tus direcciones...</span>
+                                        </div>
+                                    ) : addresses.length > 0 ? (
+                                        <div className="space-y-4">
+                                            <AddressSelection 
+                                                addresses={addresses}
+                                                selectedAddress={formData.direccionEntrega}
+                                                isUsingNew={isUsingNewAddress}
+                                                onSelect={(dir) => {
+                                                    setFormData({ ...formData, direccionEntrega: dir })
+                                                    setIsUsingNewAddress(false)
+                                                }}
+                                                onUseNew={() => {
+                                                    setIsUsingNewAddress(true)
+                                                    setFormData({ ...formData, direccionEntrega: "" })
+                                                }}
+                                            />
+                                            
+                                            {isUsingNewAddress && (
+                                                <div className="animate-in slide-in-from-top-2 duration-300">
+                                                    <Input 
+                                                        placeholder="Ingresá la dirección de entrega *" 
+                                                        value={formData.direccionEntrega} 
+                                                        onChange={(e) => setFormData({...formData, direccionEntrega: e.target.value})} 
+                                                        className="h-12 rounded-xl bg-background border-border/50 focus:ring-primary/20"
+                                                        required 
+                                                        autoFocus
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <Input 
+                                            placeholder="Dirección de entrega *" 
+                                            value={formData.direccionEntrega} 
+                                            onChange={(e) => setFormData({...formData, direccionEntrega: e.target.value})} 
+                                            className="h-12 rounded-xl bg-background border-border/50 focus:ring-primary/20"
+                                            required 
+                                        />
+                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">Observaciones</label>
@@ -229,12 +297,12 @@ export function CheckoutView({
                         <Button 
                             className="w-full h-12 mt-4 rounded-2xl font-bold text-base instrument tracking-tight shadow-xl shadow-primary/10 active:shadow-none hover:scale-[1.01] transition-transform"
                             onClick={() => onConfirm(formData)}
-                            disabled={!isFormValid || isSubmitting}
+                            disabled={!isFormValid || isSubmitting || loadingPromos}
                         >
-                            {isSubmitting ? (
+                            {isSubmitting || loadingPromos ? (
                                 <div className="flex items-center gap-3">
                                     <div className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                                    Procesando pedido...
+                                    {loadingPromos ? "Calculando promociones..." : "Procesando pedido..."}
                                 </div>
                             ) : "Confirmar mi Pedido"}
                         </Button>

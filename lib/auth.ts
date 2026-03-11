@@ -9,6 +9,7 @@ export interface UserInfo {
     telefono?: string;
     direccion?: string;
     rol: string;
+    clientId?: number;
 }
 
 export interface LoginResponse {

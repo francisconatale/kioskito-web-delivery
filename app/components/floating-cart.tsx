@@ -6,9 +6,10 @@ interface FloatingCartProps {
     cart: CartItem[]
     total: number
     onCheckout: () => void
+    loading?: boolean
 }
 
-export function FloatingCart({ cart, total, onCheckout }: FloatingCartProps) {
+export function FloatingCart({ cart, total, onCheckout, loading }: FloatingCartProps) {
     const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0)
 
     if (cart.length === 0) return null
@@ -29,8 +30,12 @@ export function FloatingCart({ cart, total, onCheckout }: FloatingCartProps) {
                         </div>
                         <div className="text-right">
                             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-1">Total a Pagar</span>
-                            <div className="text-xl font-bold tracking-tight text-primary">
-                                ${total.toFixed(2)}
+                            <div className="text-xl font-bold tracking-tight text-primary min-w-[80px]">
+                                {loading ? (
+                                    <div className="h-6 w-full bg-primary/10 animate-pulse rounded-lg" />
+                                ) : (
+                                    `$${total.toFixed(2)}`
+                                )}
                             </div>
                         </div>
                     </div>

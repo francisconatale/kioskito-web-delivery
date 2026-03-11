@@ -17,7 +17,7 @@ export function AccountTab({ onTabChange }: AccountTabProps) {
                     <User className="h-12 w-12 text-primary" />
                 </div>
                 <h2 className="text-2xl font-bold tracking-tight mb-3 text-foreground/90">
-                    Tu Espacio <span className="text-primary italic font-medium">Kioskito</span>
+                    Tu Espacio <span className="text-primary italic font-medium">Caffres</span>
                 </h2>
                 <p className="text-muted-foreground text-sm font-medium mb-10 leading-relaxed px-4">
                     Identificate para acceder a tus pedidos, direcciones guardadas y promociones exclusivas.
@@ -85,6 +85,7 @@ export function AccountTab({ onTabChange }: AccountTabProps) {
                     icon={<MapPin className="h-5 w-5" />}
                     title="Mis Direcciones"
                     description="Gestioná tus puntos de entrega"
+                    onClick={() => onTabChange("direcciones")}
                 />
 
                 <MenuItem
@@ -101,7 +102,7 @@ export function AccountTab({ onTabChange }: AccountTabProps) {
                         <LogOut className="h-5 w-5 opacity-70" />
                         Cerrar Sesión
                     </button>
-                    <p className="text-[10px] text-center text-muted-foreground/30 font-bold uppercase tracking-widest mt-10">Kioskito Delivery v1.0.0</p>
+                    <p className="text-[10px] text-center text-muted-foreground/30 font-bold uppercase tracking-widest mt-10">Caffres v1.0.0 • Powered by Kioskito</p>
                 </div>
             </div>
         </div>

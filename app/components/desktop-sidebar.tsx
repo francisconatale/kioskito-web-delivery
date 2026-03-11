@@ -14,7 +14,7 @@ export function DesktopSidebar({
         <aside className="w-64 glass border-r border-border h-screen sticky top-0 flex-col hidden lg:flex shadow-xl shadow-primary/5">
             <div className="h-20 flex flex-col justify-center px-6 border-b border-border/50">
                 <h1 className="text-2xl font-bold tracking-tight text-foreground/90">
-                    Kioskito <span className="text-primary font-normal italic">Delivery</span>
+                    Caffres
                 </h1>
                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em] mt-0.5">Premium Service</p>
             </div>

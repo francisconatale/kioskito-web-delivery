@@ -113,5 +113,30 @@ export const apiClient = {
         });
         const data = await handleResponse(response, { silent: options?.silent });
         return { data };
+    },
+    put: async <T = any>(url: string, body?: any, options?: { silent?: boolean }): Promise<{ data: T }> => {
+        const response = await safeFetch(`${API_URL}${url}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: body ? JSON.stringify(body) : undefined
+        });
+        const data = await handleResponse(response, { silent: options?.silent });
+        return { data };
+    },
+    patch: async <T = any>(url: string, body?: any, options?: { silent?: boolean }): Promise<{ data: T }> => {
+        const response = await safeFetch(`${API_URL}${url}`, {
+            method: 'PATCH',
+            headers: getAuthHeaders(),
+            body: body ? JSON.stringify(body) : undefined
+        });
+        const data = await handleResponse(response, { silent: options?.silent });
+        return { data };
+    },
+    delete: async (url: string, options?: { silent?: boolean }): Promise<void> => {
+        const response = await safeFetch(`${API_URL}${url}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+        await handleResponse(response, { silent: options?.silent });
     }
 };

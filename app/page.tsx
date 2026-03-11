@@ -6,12 +6,15 @@ import { AuthScreen } from "./components/auth-screen"
 import { HomeTab } from "./components/home-tab"
 import { OrdersTab } from "./components/orders-tab"
 import { AccountTab } from "./components/account-tab"
+import { AddressesTab } from "./components/addresses-tab"
 import { BottomNav } from "./components/bottom-nav"
 import { DesktopSidebar } from "./components/desktop-sidebar"
 import { FloatingCart } from "./components/floating-cart"
 import { CheckoutView } from "./components/checkout-view"
 import { useCheckout, CheckoutFormData } from "@/hooks/use-checkout"
 import { useAuth } from "@/hooks/use-auth"
+import { usePromotions } from "./hooks/use-promotions"
+import { SuccessView } from "./components/success-view"
 
 export default function App() {
   const {
@@ -22,10 +25,12 @@ export default function App() {
     handleUpdateQuantity,
     handleCheckout
   } = useAppState()
+  const { promotionalTotal, loading: loadingPromos } = usePromotions(cart)
 
   const { authState, setAsGuest, logout, isResolvingAuth } = useAuth()
 
   const [showCheckout, setShowCheckout] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
   const { submitOrder, loading: isSubmitting, error: submitError } = useCheckout()
 
   if (isResolvingAuth) {
@@ -48,17 +53,30 @@ export default function App() {
     logout()
   }
 
-
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
-
   const handleConfirmOrder = async (formData: CheckoutFormData) => {
     try {
       await submitOrder(cart, formData)
       handleCheckout()
       setShowCheckout(false)
+      setShowSuccess(true)
     } catch (err) {
       console.error("Order processing failed:", err)
     }
+  }
+
+  if (showSuccess) {
+    return (
+      <SuccessView 
+        onBackToHome={() => {
+          setShowSuccess(false)
+          setActiveTab("inicio")
+        }}
+        onViewOrders={() => {
+          setShowSuccess(false)
+          setActiveTab("pedidos")
+        }}
+      />
+    )
   }
 
   if (showCheckout) {
@@ -85,13 +103,15 @@ export default function App() {
         {activeTab === "inicio" && <HomeTab onAddToCart={handleAddToCart} />}
         {activeTab === "pedidos" && <OrdersTab />}
         {activeTab === "cuenta" && <AccountTab onTabChange={setActiveTab} />}
+        {activeTab === "direcciones" && <AddressesTab onBack={() => setActiveTab("cuenta")} />}
       </main>
 
       {activeTab === "inicio" && (
         <FloatingCart 
           cart={cart} 
-          total={total} 
+          total={promotionalTotal} 
           onCheckout={() => setShowCheckout(true)} 
+          loading={loadingPromos}
         />
       )}
 

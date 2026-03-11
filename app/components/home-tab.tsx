@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { Search, MapPin, Plus } from "lucide-react"
+import { useState, useRef, useCallback } from "react"
+import { Search, MapPin, Plus, Loader2 } from "lucide-react"
 import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { CATEGORIES, Product } from "@/lib/data"
@@ -13,16 +13,50 @@ interface HomeTabProps {
 export function HomeTab({ onAddToCart }: HomeTabProps) {
     const [selectedCategory, setSelectedCategory] = useState("all")
     const [searchQuery, setSearchQuery] = useState("")
+    const [submittedSearchQuery, setSubmittedSearchQuery] = useState("") // Only updates API when submitted
 
-    const { products, loading, error } = useProducts()
+    // Pass the state variables to useProducts so it delegates filtering to the backend
+    const {
+        products,
+        loading,
+        loadingMore,
+        hasMore,
+        loadMore,
+        error
+    } = useProducts({
+        searchQuery: submittedSearchQuery,
+        category: selectedCategory,
+        size: 15
+    })
+
     const { categories } = useCategories()
 
-    const filteredProducts = products.filter((product) => {
-        const productCategory = product.categoria?.toUpperCase() || ""
-        const matchesCategory = selectedCategory === "all" || productCategory === selectedCategory
-        const matchesSearch = product.nombre.toLowerCase().includes(searchQuery.toLowerCase())
-        return matchesCategory && matchesSearch
-    })
+    const observer = useRef<IntersectionObserver | null>(null)
+    const lastProductElementRef = useCallback((node: HTMLDivElement | null) => {
+        if (loading || loadingMore) return
+        if (observer.current) observer.current.disconnect()
+
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                loadMore()
+            }
+        })
+
+        if (node) observer.current.observe(node)
+    }, [loading, loadingMore, hasMore, loadMore])
+
+    // Local filtering is no longer needed since the backend does it.
+    const filteredProducts = products;
+
+    const handleSearch = () => {
+        setSubmittedSearchQuery(searchQuery)
+    }
+
+    const clearSearch = () => {
+        setSearchQuery("")
+        setSubmittedSearchQuery("")
+        setSelectedCategory("all")
+    }
 
     return (
         <div className="pb-32 lg:pb-8 selection:bg-primary/20">
@@ -31,22 +65,31 @@ export function HomeTab({ onAddToCart }: HomeTabProps) {
                     <div className="flex flex-col gap-4 py-4">
                         <div className="flex items-center justify-between">
                             <h1 className="text-2xl font-bold tracking-tight text-foreground/90 lg:hidden">
-                                Kioskito <span className="text-primary font-normal italic">Delivery</span>
+                                Caffres
                             </h1>
                             <div className="hidden lg:flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-widest bg-muted/50 px-3 py-1.5 rounded-full">
                                 <MapPin className="h-3 w-3" />
-                                <span>Buenos Aires, AR</span>
+                                <span>Miguel Cane 4598, San Miguel, Buenos Aires</span>
                             </div>
                         </div>
-                        
-                        <div className="relative group">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
-                            <Input
-                                placeholder="¿Qué estás buscando hoy?"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10 h-11 bg-card/50 border-border/50 text-base rounded-xl transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
-                            />
+
+                        <div className="relative group flex gap-2">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
+                                <Input
+                                    placeholder="¿Qué estás buscando hoy?"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                    className="pl-10 pr-4 h-11 bg-card/50 border-border/50 text-base rounded-xl transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
+                                />
+                            </div>
+                            <button
+                                onClick={handleSearch}
+                                className="h-11 px-4 bg-primary text-primary-foreground rounded-xl text-sm font-semibold shadow-md active:scale-95 transition-all"
+                            >
+                                Buscar
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -58,11 +101,10 @@ export function HomeTab({ onAddToCart }: HomeTabProps) {
                     <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-1 px-1">
                         <button
                             onClick={() => setSelectedCategory("all")}
-                            className={`px-5 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all border ${
-                                selectedCategory === "all"
-                                    ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
-                                    : "bg-card text-muted-foreground border-border/50 hover:border-primary/30 hover:text-foreground"
-                            }`}
+                            className={`px-5 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all border ${selectedCategory === "all"
+                                ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
+                                : "bg-card text-muted-foreground border-border/50 hover:border-primary/30 hover:text-foreground"
+                                }`}
                         >
                             Todos
                         </button>
@@ -70,11 +112,10 @@ export function HomeTab({ onAddToCart }: HomeTabProps) {
                             <button
                                 key={cat.id}
                                 onClick={() => setSelectedCategory(cat.nombre.toUpperCase())}
-                                className={`px-5 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all border ${
-                                    selectedCategory === cat.nombre.toUpperCase()
-                                        ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
-                                        : "bg-card text-muted-foreground border-border/50 hover:border-primary/30 hover:text-foreground"
-                                }`}
+                                className={`px-5 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all border ${selectedCategory === cat.nombre.toUpperCase()
+                                    ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
+                                    : "bg-card text-muted-foreground border-border/50 hover:border-primary/30 hover:text-foreground"
+                                    }`}
                             >
                                 {cat.nombre}
                             </button>
@@ -95,54 +136,73 @@ export function HomeTab({ onAddToCart }: HomeTabProps) {
                     <div className="text-center py-20">
                         <div className="text-4xl mb-4">🔍</div>
                         <p className="text-muted-foreground text-sm font-medium">No encontramos productos que coincidan.</p>
-                        <button onClick={() => {setSearchQuery(""); setSelectedCategory("all")}} className="text-primary text-sm font-semibold mt-2 hover:underline">Ver todo el catálogo</button>
+                        <button onClick={clearSearch} className="text-primary text-sm font-semibold mt-2 hover:underline">Ver todo el catálogo</button>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 gap-4">
-                        {filteredProducts.map((product) => (
-                            <div 
-                                key={product.id} 
-                                className="group flex items-center gap-4 p-4 rounded-2xl border border-transparent bg-card hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.99]"
-                            >
-                                <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-muted/30 border border-border/10 flex items-center justify-center transition-transform group-hover:scale-105">
-                                    {product.image ? (
-                                        <Image
-                                            src={product.image}
-                                            alt={product.nombre}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    ) : (
-                                        <span className="text-3xl filter grayscale-[0.2] group-hover:grayscale-0 transition-all">📦</span>
-                                    )}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex flex-col gap-0.5">
-                                        <span className="text-[10px] text-primary font-semibold uppercase tracking-wider">{product.categoria || "General"}</span>
-                                        <h4 className="text-base font-bold text-foreground/90 group-hover:text-primary transition-colors truncate">
-                                            {product.nombre}
-                                        </h4>
+                        {filteredProducts.map((product, index) => {
+                            const isLast = index === filteredProducts.length - 1;
+
+                            return (
+                                <div
+                                    key={`${product.id}-${index}`}
+                                    ref={isLast ? lastProductElementRef : null}
+                                    className="group flex items-center gap-4 p-4 rounded-2xl border border-transparent bg-card hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.99]"
+                                >
+                                    <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-muted/30 border border-border/10 flex items-center justify-center transition-transform group-hover:scale-105">
+                                        {product.image ? (
+                                            <Image
+                                                src={product.image}
+                                                alt={product.nombre}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        ) : (
+                                            <span className="text-3xl filter grayscale-[0.2] group-hover:grayscale-0 transition-all">📦</span>
+                                        )}
                                     </div>
-                                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed h-8">
-                                        {product.descripcion || "Sin descripción disponible"}
-                                    </p>
-                                    <div className="flex items-center justify-between mt-3">
-                                        <div className="flex flex-col">
-                                            <span className="text-lg font-bold text-foreground">
-                                                ${product.precioVenta?.toFixed(2)}
-                                            </span>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex flex-col gap-0.5">
+                                            <span className="text-[10px] text-primary font-semibold uppercase tracking-wider">{product.categoria || "General"}</span>
+                                            <h4 className="text-base font-bold text-foreground/90 group-hover:text-primary transition-colors truncate">
+                                                {product.nombre}
+                                            </h4>
                                         </div>
-                                        <button
-                                            onClick={() => onAddToCart(product)}
-                                            className="h-10 px-4 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2 transition-all shadow-md shadow-primary/10 active:shadow-none font-medium text-sm"
-                                        >
-                                            <Plus className="h-4 w-4" />
-                                            <span>Agregar</span>
-                                        </button>
+                                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed h-8">
+                                            {product.descripcion || "Sin descripción disponible"}
+                                        </p>
+                                        <div className="flex items-center justify-between mt-3">
+                                            <div className="flex flex-col">
+                                                <span className="text-lg font-bold text-foreground">
+                                                    ${product.precioVenta?.toFixed(2)}
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={() => onAddToCart(product)}
+                                                className="h-10 px-4 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2 transition-all shadow-md shadow-primary/10 active:shadow-none font-medium text-sm"
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                                <span>Agregar</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
+                            )
+                        })}
+
+                        {/* Loading More Indicator */}
+                        {loadingMore && (
+                            <div className="flex justify-center py-6">
+                                <Loader2 className="h-6 w-6 animate-spin text-primary" />
                             </div>
-                        ))}
+                        )}
+
+                        {/* End of list message (optional, usually subtle) */}
+                        {!hasMore && filteredProducts.length > 0 && (
+                            <div className="text-center py-8 opacity-50">
+                                <p className="text-xs font-bold uppercase tracking-widest">No hay más productos</p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

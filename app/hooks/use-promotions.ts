@@ -55,16 +55,23 @@ export function usePromotions(cart: CartItem[]) {
                 })
 
                 if (data) {
+                    // Group promotions by name to avoid duplicate lines for the same promo (e.g. combos)
+                    const groupedPromos = (data.detalles || [])
+                        .filter((d: any) => d.descuento > 0)
+                        .reduce((acc: Record<string, number>, curr: any) => {
+                            const name = curr.nombrePromocion || "Descuento aplicado"
+                            acc[name] = (acc[name] || 0) + curr.descuento
+                            return acc
+                        }, {})
+
                     setState({
                         originalTotal: data.totalOriginal || 0,
                         promotionalTotal: data.totalFinal || 0,
                         savings: data.totalDescuento || 0,
-                        appliedPromotions: (data.detalles || [])
-                            .filter((d: any) => d.descuento > 0)
-                            .map((d: any) => ({
-                                nombre: d.nombrePromocion || "Descuento aplicado",
-                                descuento: d.descuento
-                            })),
+                        appliedPromotions: Object.entries(groupedPromos).map(([nombre, descuento]) => ({
+                            nombre,
+                            descuento: descuento as number
+                        })),
                         loading: false,
                         error: null
                     })

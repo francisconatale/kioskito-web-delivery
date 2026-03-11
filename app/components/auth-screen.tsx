@@ -54,7 +54,7 @@ export function AuthScreen() {
             <div className="w-full max-w-sm z-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
                 <div className="text-center mb-10 translate-y-0 group">
                     <h1 className="text-4xl font-bold tracking-tighter mb-3 bg-gradient-to-br from-foreground to-foreground/50 bg-clip-text text-transparent">
-                        Kioskito <span className="text-primary italic font-medium">Delivery</span>
+                        Caffres
                     </h1>
                     <p className="text-muted-foreground font-bold uppercase tracking-widest text-[10px] opacity-70">
                         Premium Service • Fast & Reliable
@@ -214,7 +214,7 @@ export function AuthScreen() {
                 </button>
 
                 <p className="mt-12 text-center text-[10px] text-muted-foreground/30 font-bold uppercase tracking-widest">
-                    © 2024 Kioskito Ecosystem
+                    © {new Date().getFullYear()} Caffres | Powered by Kioskito
                 </p>
             </div>
         </div>
