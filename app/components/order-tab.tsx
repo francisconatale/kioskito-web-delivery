@@ -19,24 +19,24 @@ export function OrderTab({
     const { originalTotal, promotionalTotal, appliedPromotions } = usePromotions(cart)
 
     return (
-        <div className={`flex flex-col h-full ${!isDesktop ? "pb-24" : ""}`}>
+        <div className={`flex flex-col h-full bg-background/50 selection:bg-primary/20 animate-in fade-in duration-300 ${!isDesktop ? "pb-32" : ""}`}>
             {/* Header */}
-            <div className="h-16 flex items-center px-6 border-b border-border shrink-0">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                    <ShoppingBag className="h-5 w-5" />
+            <div className={`h-16 flex items-center px-6 border-b border-border/50 shrink-0 glass z-10 sticky top-0`}>
+                <h2 className="text-lg font-bold tracking-tight flex items-center gap-3">
+                    <ShoppingBag className="h-5 w-5 text-primary" />
                     {isDesktop ? "Tu Pedido" : "Mi Pedido"}
                 </h2>
             </div>
 
-            <div className="flex-grow overflow-y-auto p-4 lg:p-6">
+            <div className="flex-grow overflow-y-auto p-4 lg:p-6 custom-scrollbar">
                 {cart.length === 0 ? (
-                    <div className="text-center py-12 flex flex-col items-center justify-center h-full">
-                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                            <ShoppingBag className="h-8 w-8 text-muted-foreground" />
+                    <div className="text-center py-20 flex flex-col items-center justify-center h-full opacity-60">
+                        <div className="w-20 h-20 rounded-[2.5rem] bg-muted/50 flex items-center justify-center mb-6 rotate-3">
+                            <ShoppingBag className="h-10 w-10 text-muted-foreground" />
                         </div>
-                        <p className="text-foreground font-medium">Tu carrito esta vacio</p>
-                        <p className="text-sm text-muted-foreground mt-1">
-                            Agrega productos desde el menu
+                        <p className="text-base font-bold tracking-tight">Tu carrito está vacío</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mt-2">
+                            Agregá productos desde el menú
                         </p>
                     </div>
                 ) : (
@@ -44,32 +44,32 @@ export function OrderTab({
                         {cart.map((item) => (
                             <div 
                                 key={item.id} 
-                                className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card"
+                                className="flex items-center gap-4 p-4 rounded-2xl border border-border/50 bg-card group transition-all duration-300 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5"
                             >
-                                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center text-lg flex-shrink-0">
+                                <div className="w-14 h-14 bg-primary/5 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-105 transition-transform">
                                     🍽️
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="font-medium text-sm truncate">{item.name}</h3>
-                                    <p className="text-sm font-semibold mt-0.5">
+                                    <h3 className="font-semibold text-sm text-foreground/90 truncate group-hover:text-primary transition-colors">{item.name}</h3>
+                                    <p className="font-bold text-xs mt-1 text-foreground/80">
                                         ${(item.price * item.quantity).toFixed(2)}
                                     </p>
                                 </div>
-                                <div className="flex items-center gap-2 flex-shrink-0">
+                                <div className="flex items-center gap-2 flex-shrink-0 bg-muted/30 p-1 rounded-xl border border-border/30">
                                     <button
-                                        className="h-8 w-8 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors"
+                                        className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-card transition-all active:scale-90"
                                         onClick={() => onUpdateQuantity(item.id, -1)}
                                     >
-                                        <Minus className="h-3.5 w-3.5" />
+                                        <Minus className="h-4 w-4" />
                                     </button>
-                                    <span className="w-6 text-center text-sm font-medium">
+                                    <span className="w-6 text-center text-sm font-bold">
                                         {item.quantity}
                                     </span>
                                     <button
-                                        className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
+                                        className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-all shadow-sm active:scale-90"
                                         onClick={() => onUpdateQuantity(item.id, 1)}
                                     >
-                                        <Plus className="h-3.5 w-3.5" />
+                                        <Plus className="h-4 w-4" />
                                     </button>
                                 </div>
                             </div>
@@ -79,47 +79,48 @@ export function OrderTab({
             </div>
 
             {cart.length > 0 && (
-                <div className="p-4 lg:p-6 border-t border-border shrink-0 space-y-4">
-                    <div className="space-y-2">
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="text-muted-foreground">Subtotal</span>
-                            <span>${originalTotal.toFixed(2)}</span>
+                <div className="p-6 border-t border-border/50 glass shrink-0 space-y-6">
+                    <div className="space-y-3">
+                        <div className="flex justify-between items-center text-sm font-medium">
+                            <span className="text-muted-foreground italic">Subtotal</span>
+                            <span className="font-semibold">${originalTotal.toFixed(2)}</span>
                         </div>
 
                         {appliedPromotions.length > 0 && (
-                            <>
+                            <div className="space-y-2">
                                 {appliedPromotions.map((promo, idx) => (
                                     <div 
                                         key={idx} 
-                                        className="flex justify-between items-center text-sm text-green-600 dark:text-green-400"
+                                        className="flex justify-between items-center text-xs font-semibold text-green-600 bg-green-500/5 px-3 py-2 rounded-xl border border-green-500/10"
                                     >
                                         <span className="flex items-center gap-2">
-                                            <span className="text-[10px] font-semibold bg-green-100 dark:bg-green-900/40 px-1.5 py-0.5 rounded">
-                                                PROMO
-                                            </span>
+                                            <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
                                             <span className="truncate">{promo.nombre}</span>
                                         </span>
                                         <span>-${promo.descuento.toFixed(2)}</span>
                                     </div>
                                 ))}
-                            </>
+                            </div>
                         )}
 
-                        <div className="h-px bg-border my-2" />
+                        <div className="h-px bg-border/50 my-1" />
 
-                        <div className="flex justify-between items-center">
-                            <span className="font-semibold">Total</span>
-                            <span className="text-xl font-semibold">
-                                ${promotionalTotal.toFixed(2)}
-                            </span>
+                        <div className="flex justify-between items-end">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">Total Final</span>
+                                <span className="text-2xl font-bold tracking-tighter text-primary">
+                                    ${promotionalTotal.toFixed(2)}
+                                </span>
+                            </div>
+                            <div className="text-[10px] font-semibold text-muted-foreground/30 italic pb-1">IVA incluido</div>
                         </div>
                     </div>
 
                     <Button
-                        className="w-full h-11"
+                        className="w-full h-12 rounded-2xl font-bold text-base tracking-tight shadow-xl shadow-primary/10 active:scale-[0.98] transition-all hover:shadow-primary/20"
                         onClick={onCheckout}
                     >
-                        Confirmar Pedido
+                        Confirmar mi Pedido
                     </Button>
                 </div>
             )}

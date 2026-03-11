@@ -1,51 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 9%;
-    --radius: 0.5rem;
+    --background: 0.97 0.02 240;
+    --foreground: 0.15 0.015 240;
+    --card: 0.99 0.01 240;
+    --card-foreground: 0.15 0.015 240;
+    --popover: 0.99 0.01 240;
+    --popover-foreground: 0.15 0.015 240;
+    --primary: 0.55 0.18 240;
+    --primary-foreground: 0.99 0.01 240;
+    --secondary: 0.92 0.02 240;
+    --secondary-foreground: 0.15 0.015 240;
+    --muted: 0.89 0.02 240;
+    --muted-foreground: 0.45 0.015 240;
+    --accent: 0.6 0.2 250;
+    --accent-foreground: 0.99 0.01 240;
+    --destructive: 0.55 0.2 25;
+    --destructive-foreground: 0.99 0.005 85;
+    --border: 0.85 0.02 240;
+    --input: 0.95 0.02 240;
+    --ring: 0.55 0.18 240;
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 64%;
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 0 0% 83%;
+    --background: 0.12 0.02 240;
+    --foreground: 0.97 0.01 240;
+    --card: 0.15 0.02 240;
+    --card-foreground: 0.97 0.01 240;
+    --popover: 0.15 0.02 240;
+    --popover-foreground: 0.97 0.01 240;
+    --primary: 0.6 0.2 240;
+    --primary-foreground: 0.12 0.02 240;
+    --secondary: 0.2 0.02 240;
+    --secondary-foreground: 0.97 0.01 240;
+    --muted: 0.2 0.02 240;
+    --muted-foreground: 0.7 0.01 240;
+    --accent: 0.65 0.22 250;
+    --accent-foreground: 0.12 0.02 240;
+    --destructive: 0.55 0.2 25;
+    --destructive-foreground: 0.97 0.01 85;
+    --border: 0.25 0.02 240;
+    --input: 0.2 0.02 240;
+    --ring: 0.6 0.2 240;
   }
 }
 
@@ -55,7 +57,13 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Figtree', sans-serif;
   }
+}
+
+
+.glass {
+  @apply bg-card/60 backdrop-blur-md border border-border/50;
 }
 
 @layer utilities {

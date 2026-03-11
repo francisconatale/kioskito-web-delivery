@@ -14,21 +14,33 @@ export function FloatingCart({ cart, total, onCheckout }: FloatingCartProps) {
     if (cart.length === 0) return null
 
     return (
-        <div className="fixed bottom-20 lg:bottom-6 left-4 right-4 lg:left-auto lg:right-6 lg:w-80 z-40">
-            <div className="bg-card border border-border rounded-lg shadow-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                        <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">{itemCount} items</span>
+        <div className="fixed bottom-24 lg:bottom-10 left-4 right-4 lg:left-auto lg:right-10 lg:w-80 z-40 animate-in slide-in-from-bottom-8 duration-500">
+            <div className="glass border-border/40 rounded-[2rem] shadow-2xl shadow-primary/20 overflow-hidden group">
+                <div className="bg-card/50 p-6 flex flex-col gap-5">
+                    <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-1">Tu Selección</span>
+                            <div className="flex items-center gap-2.5">
+                                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                    <ShoppingBag className="h-4 w-4 text-primary" />
+                                </div>
+                                <span className="text-sm font-semibold text-foreground/80">{itemCount} productos</span>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-1">Total Paco</span>
+                            <div className="text-xl font-bold tracking-tight text-primary">
+                                ${total.toFixed(2)}
+                            </div>
+                        </div>
                     </div>
-                    <span className="font-semibold">${total.toFixed(2)}</span>
+                    <Button 
+                        className="w-full h-12 rounded-2xl font-bold text-base tracking-tight shadow-lg shadow-primary/10 active:scale-[0.98] transition-all"
+                        onClick={onCheckout}
+                    >
+                        Confirmar Pedido
+                    </Button>
                 </div>
-                <Button 
-                    className="w-full h-10"
-                    onClick={onCheckout}
-                >
-                    Ir a pagar
-                </Button>
             </div>
         </div>
     )
