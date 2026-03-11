@@ -1,22 +1,39 @@
+import { useState } from "react"
 import { ArrowLeft, Minus, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { CartItem } from "@/lib/data"
 import { usePromotions } from "../hooks/use-promotions"
+import { CheckoutFormData } from "@/hooks/use-checkout"
 
 interface CheckoutViewProps {
     cart: CartItem[]
     onUpdateQuantity: (id: number, delta: number) => void
-    onConfirm: () => void
+    onConfirm: (data: CheckoutFormData) => void
     onBack: () => void
+    isSubmitting: boolean
+    error: string | null
 }
 
 export function CheckoutView({ 
     cart, 
     onUpdateQuantity, 
     onConfirm, 
-    onBack 
+    onBack,
+    isSubmitting,
+    error
 }: CheckoutViewProps) {
     const { originalTotal, promotionalTotal, appliedPromotions } = usePromotions(cart)
+    
+    const [formData, setFormData] = useState<CheckoutFormData>({
+        nombreCliente: "",
+        dniCliente: "",
+        telefonoContacto: "",
+        direccionEntrega: "",
+        observaciones: ""
+    })
+
+    const isFormValid = formData.nombreCliente.trim() !== "" && formData.direccionEntrega.trim() !== ""
 
     return (
         <div className="min-h-screen bg-background pb-24 lg:pb-8">
@@ -88,6 +105,15 @@ export function CheckoutView({
                             ))}
                         </div>
 
+                        <div className="space-y-4 mb-6">
+                            <h3 className="font-semibold px-1">Datos de entrega</h3>
+                            <Input placeholder="Nombre *" value={formData.nombreCliente} onChange={(e) => setFormData({...formData, nombreCliente: e.target.value})} required />
+                            <Input placeholder="DNI" value={formData.dniCliente} onChange={(e) => setFormData({...formData, dniCliente: e.target.value})} />
+                            <Input placeholder="Teléfono" value={formData.telefonoContacto} onChange={(e) => setFormData({...formData, telefonoContacto: e.target.value})} />
+                            <Input placeholder="Dirección de entrega *" value={formData.direccionEntrega} onChange={(e) => setFormData({...formData, direccionEntrega: e.target.value})} required />
+                            <Input placeholder="Observaciones (ej. timbre, sin cebolla...)" value={formData.observaciones} onChange={(e) => setFormData({...formData, observaciones: e.target.value})} />
+                        </div>
+
                         <div className="rounded-lg border border-border bg-card p-4 space-y-3">
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">Subtotal</span>
@@ -114,11 +140,18 @@ export function CheckoutView({
                             </div>
                         </div>
 
+                        {error && (
+                            <div className="mt-4 p-3 bg-destructive/10 text-destructive rounded-md text-sm border border-destructive/20 text-center">
+                                {error}
+                            </div>
+                        )}
+
                         <Button 
                             className="w-full h-12 mt-6"
-                            onClick={onConfirm}
+                            onClick={() => onConfirm(formData)}
+                            disabled={!isFormValid || isSubmitting}
                         >
-                            Confirmar y pagar
+                            {isSubmitting ? "Procesando..." : "Confirmar y pagar"}
                         </Button>
                     </>
                 )}

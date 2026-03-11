@@ -10,6 +10,7 @@ import { BottomNav } from "./components/bottom-nav"
 import { DesktopSidebar } from "./components/desktop-sidebar"
 import { FloatingCart } from "./components/floating-cart"
 import { CheckoutView } from "./components/checkout-view"
+import { useCheckout, CheckoutFormData } from "@/hooks/use-checkout"
 
 export default function App() {
   const {
@@ -24,6 +25,7 @@ export default function App() {
   } = useAppState()
 
   const [showCheckout, setShowCheckout] = useState(false)
+  const { submitOrder, loading: isSubmitting, error: submitError } = useCheckout()
 
   if (authState === "login") {
     return <AuthScreen onLogin={() => setAuthState("authenticated")} onGuest={() => setAuthState("guest")} />
@@ -37,9 +39,14 @@ export default function App() {
 
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
-  const handleConfirmOrder = () => {
-    handleCheckout()
-    setShowCheckout(false)
+  const handleConfirmOrder = async (formData: CheckoutFormData) => {
+    try {
+      await submitOrder(cart, formData)
+      handleCheckout()
+      setShowCheckout(false)
+    } catch (err) {
+      console.error("Order processing failed:", err)
+    }
   }
 
   if (showCheckout) {
@@ -49,6 +56,8 @@ export default function App() {
         onUpdateQuantity={handleUpdateQuantity}
         onConfirm={handleConfirmOrder}
         onBack={() => setShowCheckout(false)}
+        isSubmitting={isSubmitting}
+        error={submitError}
       />
     )
   }
