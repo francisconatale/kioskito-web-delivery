@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react"
-import { Search, MapPin, Plus, Loader2 } from "lucide-react"
+import { Search, MapPin, Plus, Loader2, X } from "lucide-react"
 import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { CATEGORIES, Product } from "@/lib/data"
@@ -15,7 +15,6 @@ export function HomeTab({ onAddToCart }: HomeTabProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [submittedSearchQuery, setSubmittedSearchQuery] = useState("") // Only updates API when submitted
 
-    // Pass the state variables to useProducts so it delegates filtering to the backend
     const {
         products,
         loading,
@@ -45,7 +44,6 @@ export function HomeTab({ onAddToCart }: HomeTabProps) {
         if (node) observer.current.observe(node)
     }, [loading, loadingMore, hasMore, loadMore])
 
-    // Local filtering is no longer needed since the backend does it.
     const filteredProducts = products;
 
     const handleSearch = () => {
@@ -75,14 +73,27 @@ export function HomeTab({ onAddToCart }: HomeTabProps) {
 
                         <div className="relative group flex gap-2">
                             <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
                                 <Input
                                     placeholder="¿Qué estás buscando hoy?"
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setSearchQuery(val);
+                                        if (val === "") {
+                                            setSubmittedSearchQuery(""); // Auto-clear if empty
+                                        }
+                                    }}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                    className="pl-10 pr-4 h-11 bg-card/50 border-border/50 text-base rounded-xl transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
+                                    className="px-4 pr-10 h-11 bg-card/50 border-border/50 text-base rounded-xl transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
                                 />
+                                {searchQuery && (
+                                    <button 
+                                        onClick={clearSearch}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-muted"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </button>
+                                )}
                             </div>
                             <button
                                 onClick={handleSearch}
@@ -196,16 +207,9 @@ export function HomeTab({ onAddToCart }: HomeTabProps) {
                                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
                             </div>
                         )}
-
-                        {/* End of list message (optional, usually subtle) */}
-                        {!hasMore && filteredProducts.length > 0 && (
-                            <div className="text-center py-8 opacity-50">
-                                <p className="text-xs font-bold uppercase tracking-widest">No hay más productos</p>
-                            </div>
-                        )}
                     </div>
                 )}
-            </div>
         </div>
+        </div >
     )
 }
