@@ -12,7 +12,7 @@ export function OrdersTab() {
     if (selectedOrder) {
         return (
             <div className="pb-24 lg:pb-8 animate-in fade-in duration-300">
-                <header className="sticky top-0 z-20 glass border-x-0 border-t-0">
+                <header className="sticky top-0 z-20 glass border-x-0 border-t-0 lg:hidden">
                     <div className="max-w-2xl mx-auto px-4 lg:px-6">
                         <div className="flex items-center gap-3 h-16">
                             <button 
@@ -119,7 +119,7 @@ export function OrdersTab() {
 
     return (
         <div className="pb-24 lg:pb-8 selection:bg-primary/20">
-            <header className="sticky top-0 z-20 glass border-x-0 border-t-0">
+            <header className="sticky top-0 z-20 glass border-x-0 border-t-0 lg:hidden">
                 <div className="max-w-2xl mx-auto px-4 lg:px-6">
                     <div className="flex items-center gap-3 h-16">
                         <ClipboardList className="h-6 w-6 text-primary" />

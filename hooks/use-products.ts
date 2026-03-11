@@ -12,7 +12,7 @@ export function useProducts() {
             try {
                 setLoading(true);
                 const { data } = await apiClient.get<any>("/productos", {
-                    params: { page: 0, size: 500, activado: true, negocioId: 1 }
+                    params: { page: 0, size: -1, activado: true, negocioId: 1 }
                 });
 
                 const items = Array.isArray(data) ? data : (data?.data || data?.content || []);

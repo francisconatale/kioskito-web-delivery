@@ -28,7 +28,7 @@ export function FloatingCart({ cart, total, onCheckout }: FloatingCartProps) {
                             </div>
                         </div>
                         <div className="text-right">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-1">Total Paco</span>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-1">Total a Pagar</span>
                             <div className="text-xl font-bold tracking-tight text-primary">
                                 ${total.toFixed(2)}
                             </div>

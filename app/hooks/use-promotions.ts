@@ -1,40 +1,91 @@
+import { useState, useEffect } from "react"
 import { CartItem } from "@/lib/data"
+import { apiClient } from "@/lib/api-client"
 
-export function calculatePromotions(cart: CartItem[]) {
-    const originalTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    let savings = 0
-    const appliedPromotions: { nombre: string; descuento: number }[] = []
+export interface AppliedPromotion {
+    nombre: string
+    descuento: number
+}
 
-    // Promo 1: 2x1 en Bowl de Salmón (id: 4)
-    const bowlSalmon = cart.find(item => item.id === 4)
-    if (bowlSalmon && bowlSalmon.quantity >= 2) {
-        const freeCount = Math.floor(bowlSalmon.quantity / 2)
-        const discount = freeCount * bowlSalmon.price
-        savings += discount
-        appliedPromotions.push({ nombre: "2x1 en Bowl de Salmón", descuento: discount })
-    }
-
-    // Promo 2: Combo (Bowl de Proteína id: 1 + Smoothie Verde id: 2) -> $15 total (normal is 12.99 + 6.99 = 19.98, discount = 4.98)
-    const bowlProteina = cart.find(item => item.id === 1)
-    const smoothie = cart.find(item => item.id === 2)
-    if (bowlProteina && smoothie && bowlProteina.quantity > 0 && smoothie.quantity > 0) {
-        const combos = Math.min(bowlProteina.quantity, smoothie.quantity)
-        const discount = combos * 4.98
-        savings += discount
-        appliedPromotions.push({ nombre: "Combo Proteína + Smoothie", descuento: discount })
-    }
-
-    const promotionalTotal = Math.max(0, originalTotal - savings)
-
-    return {
-        originalTotal,
-        savings,
-        promotionalTotal,
-        appliedPromotions
-    }
+export interface PromotionState {
+    originalTotal: number
+    promotionalTotal: number
+    savings: number
+    appliedPromotions: AppliedPromotion[]
+    loading: boolean
+    error: string | null
 }
 
 export function usePromotions(cart: CartItem[]) {
-    // En este caso es sincrono, pero devolvemos como hook por si a futuro mockeamos un timer
-    return calculatePromotions(cart)
+    const [state, setState] = useState<PromotionState>({
+        originalTotal: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        promotionalTotal: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        savings: 0,
+        appliedPromotions: [],
+        loading: false,
+        error: null
+    })
+
+    useEffect(() => {
+        const simulatePromotions = async () => {
+            if (cart.length === 0) {
+                setState({
+                    originalTotal: 0,
+                    promotionalTotal: 0,
+                    savings: 0,
+                    appliedPromotions: [],
+                    loading: false,
+                    error: null
+                })
+                return
+            }
+
+            try {
+                setState(prev => ({ ...prev, loading: true, error: null }))
+
+                // Map UI cart to backend SimularPromocionesRequest format
+                const items = cart.map(item => ({
+                    productoId: item.id,
+                    cantidad: item.quantity,
+                    precioUnitario: item.price
+                }))
+
+                const { data } = await apiClient.post<any>("/promociones/simular", { items }, {
+                    params: { negocioId: 1 }
+                })
+
+                if (data) {
+                    setState({
+                        originalTotal: data.totalOriginal || 0,
+                        promotionalTotal: data.totalFinal || 0,
+                        savings: data.totalDescuento || 0,
+                        appliedPromotions: (data.detalles || [])
+                            .filter((d: any) => d.descuento > 0)
+                            .map((d: any) => ({
+                                nombre: d.nombrePromocion || "Descuento aplicado",
+                                descuento: d.descuento
+                            })),
+                        loading: false,
+                        error: null
+                    })
+                }
+            } catch (err: any) {
+                console.error("Error simulating promotions:", err)
+                setState(prev => ({ 
+                    ...prev, 
+                    loading: false, 
+                    error: "No se pudieron calcular las promociones" 
+                }))
+            }
+        }
+
+        // Debounce calculation to avoid excessive API calls
+        const timer = setTimeout(() => {
+            simulatePromotions()
+        }, 500)
+
+        return () => clearTimeout(timer)
+    }, [cart])
+
+    return state
 }

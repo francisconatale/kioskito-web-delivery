@@ -46,7 +46,7 @@ export function AccountTab({ onTabChange }: AccountTabProps) {
     return (
         <div className="pb-32 max-w-xl mx-auto w-full selection:bg-primary/20 animate-in fade-in duration-300">
             {/* Header */}
-            <header className="sticky top-0 z-20 glass border-x-0 border-t-0">
+            <header className="sticky top-0 z-20 glass border-x-0 border-t-0 lg:hidden">
                 <div className="px-6 h-16 flex items-center">
                     <h1 className="text-lg font-bold tracking-tight">Mi Perfil</h1>
                 </div>

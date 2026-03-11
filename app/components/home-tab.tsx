@@ -30,7 +30,7 @@ export function HomeTab({ onAddToCart }: HomeTabProps) {
                 <div className="max-w-3xl mx-auto px-4 lg:px-6">
                     <div className="flex flex-col gap-4 py-4">
                         <div className="flex items-center justify-between">
-                            <h1 className="text-2xl font-bold tracking-tight text-foreground/90">
+                            <h1 className="text-2xl font-bold tracking-tight text-foreground/90 lg:hidden">
                                 Kioskito <span className="text-primary font-normal italic">Delivery</span>
                             </h1>
                             <div className="hidden lg:flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-widest bg-muted/50 px-3 py-1.5 rounded-full">
