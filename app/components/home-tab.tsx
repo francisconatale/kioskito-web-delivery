@@ -19,7 +19,6 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart }: HomeTabProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [submittedSearchQuery, setSubmittedSearchQuery] = useState("") // Only updates API when submitted
     const [addingPromoId, setAddingPromoId] = useState<number | null>(null)
-    const [isAllPromosOpen, setIsAllPromosOpen] = useState(false)
     const [selectedPromo, setSelectedPromo] = useState<any>(null)
 
     const { promotions, loading: loadingPromos } = useActivePromotions()
@@ -80,7 +79,6 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart }: HomeTabProps) {
                 isFixedPromoOnly: !hasCategories && allProductsForPromo.length > 0
             });
 
-            setIsAllPromosOpen(false);
             setSearchQuery("");
             setSubmittedSearchQuery("");
             setSelectedCategory("all");
@@ -221,9 +219,7 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart }: HomeTabProps) {
 
                                                         {promo.precioOriginal !== undefined && promo.precioPromocional !== undefined ? (
                                                             <div className="flex flex-col gap-1 mt-2 self-start">
-                                                                 {(promo as any).esEstimado && (
-                                                                     <span className="text-[10px] text-black font-black bg-white/90 px-2 py-0.5 rounded-full uppercase tracking-wider w-max shadow-sm border border-black/5 animate-in fade-in zoom-in duration-300">Precio Estimado</span>
-                                                                 )}
+                                                                 {/* Price estimation indicator removed per user request */}
                                                                 <div className="flex items-center gap-2 bg-black/20 inline-flex px-2 py-1 rounded-lg backdrop-blur-sm">
                                                                     <span className="text-white/60 text-xs line-through font-medium">
                                                                         ${Number(promo.precioOriginal).toFixed(2)}
@@ -250,15 +246,6 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart }: HomeTabProps) {
                                 )}
                             </div>
 
-                            <div className="mt-4 flex justify-end">
-                                <button
-                                    onClick={() => setIsAllPromosOpen(true)}
-                                    className="text-sm font-bold text-white bg-white/20 hover:bg-white/30 backdrop-blur-md px-5 py-2 rounded-xl transition-all flex items-center gap-2"
-                                >
-                                    Ver todas las promos
-                                    <span className="text-lg leading-none">→</span>
-                                </button>
-                            </div>
                         </div>
                     </div>
                 )}
@@ -298,9 +285,6 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart }: HomeTabProps) {
                                 {selectedPromo.precioPromocional !== undefined && (
                                     <div className="flex items-center gap-2 mt-1">
                                         <span className="text-primary font-black text-sm">${Number(selectedPromo.precioPromocional).toFixed(2)}</span>
-                                        {selectedPromo.esEstimado && (
-                                            <span className="text-[8px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-bold uppercase tracking-tighter">Estimado</span>
-                                        )}
                                     </div>
                                 )}
                             </div>
@@ -413,97 +397,7 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart }: HomeTabProps) {
                 )}
             </div>
 
-            {/* All Promos Dialog */}
-            <Dialog open={isAllPromosOpen} onOpenChange={setIsAllPromosOpen}>
-                <DialogContent className="max-w-md w-11/12 rounded-3xl max-h-[85vh] flex flex-col p-0 overflow-hidden bg-background/95 backdrop-blur-xl border-border/50 shadow-2xl">
-                    <DialogHeader className="p-6 pb-4 border-b border-border/50 bg-card/50">
-                        <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-2">
-                            <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Promociones Activas</span>
-                            <span className="text-2xl">✨</span>
-                        </DialogTitle>
-                    </DialogHeader>
 
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
-                        {loadingPromos ? (
-                            <div className="flex justify-center py-10">
-                                <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                            </div>
-                        ) : promotions.length === 0 ? (
-                            <div className="text-center py-10 text-muted-foreground flex flex-col items-center gap-2">
-                                <span className="text-4xl opacity-50">🛒</span>
-                                <p className="font-medium">No hay promociones disponibles</p>
-                            </div>
-                        ) : (
-                            promotions.map((promo, i) => {
-                                const backgrounds = [
-                                    "bg-gradient-to-tr from-orange-400 to-amber-300",
-                                    "bg-gradient-to-tr from-rose-400 to-red-500",
-                                    "bg-gradient-to-tr from-indigo-500 to-purple-500",
-                                    "bg-gradient-to-tr from-emerald-400 to-teal-500"
-                                ]
-                                const bgClass = backgrounds[i % backgrounds.length]
-                                const isAdding = addingPromoId === promo.id
-
-                                return (
-                                    <div
-                                        key={promo.id || i}
-                                        onClick={() => {
-                                            handlePromoClick(promo)
-                                            setIsAllPromosOpen(false)
-                                        }}
-                                        className={`relative w-full h-[140px] rounded-2xl overflow-hidden flex-shrink-0 shadow-lg transform transition-all cursor-pointer group/card ${isAdding ? 'scale-95 opacity-80' : 'hover:-translate-y-1'}`}
-                                    >
-                                        <div className={`absolute inset-0 ${bgClass} opacity-90 group-hover/card:opacity-100 transition-opacity`}></div>
-                                        <div className="absolute inset-0 bg-black/10"></div>
-                                        <div className="relative h-full p-5 flex flex-col justify-between">
-                                            <div className="flex justify-between items-start">
-                                                <span className="text-white bg-black/30 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider backdrop-blur-md">
-                                                    {promo.tipo === 'DESCUENTO_PORCENTAJE' ? `${promo.valor}% OFF` :
-                                                        promo.tipo === 'COMBO' ? 'Combo Especial' :
-                                                            promo.tipo === '2X1' ? 'Llevá 2 pagá 1' : 'Promoción'}
-                                                </span>
-                                                {isAdding && (
-                                                    <div className="bg-black/30 backdrop-blur-sm p-2 rounded-full">
-                                                        <Loader2 className="h-4 w-4 text-white animate-spin" />
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div>
-                                                <h4 className="text-white font-black text-xl leading-tight line-clamp-1 mb-1">{promo.nombre}</h4>
-
-                                                {promo.precioOriginal !== undefined && promo.precioPromocional !== undefined ? (
-                                                    <div className="flex flex-col gap-1 mt-2 self-start">
-                                                        {(promo as any).esEstimado && (
-                                                            <span className="text-[10px] text-black font-black bg-white/90 px-2.5 py-1 rounded-full uppercase tracking-wider w-max shadow-md border border-black/5 animate-in fade-in zoom-in duration-300">Precio Estimado</span>
-                                                        )}
-                                                        <div className="flex items-center gap-2 bg-black/20 inline-flex px-3 py-1.5 rounded-lg backdrop-blur-md">
-                                                            <span className="text-white/60 text-sm line-through font-medium">
-                                                                ${Number(promo.precioOriginal).toFixed(2)}
-                                                            </span>
-                                                            <span className="text-white font-bold text-lg">
-                                                                ${Number(promo.precioPromocional).toFixed(2)}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center gap-2 mt-2 bg-black/20 self-start inline-flex px-3 py-1.5 rounded-lg backdrop-blur-md">
-                                                        <span className="text-white font-bold text-sm">
-                                                            {promo.reglas.find((r: any) => r.categoriaNombre)?.categoriaNombre
-                                                                ? `Aplica a ${promo.reglas.find((r: any) => r.categoriaNombre)?.categoriaNombre}`
-                                                                : "Ver Productos"}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )
-                            })
-                        )}
-                    </div>
-                </DialogContent>
-            </Dialog>
         </div>
     )
 }
