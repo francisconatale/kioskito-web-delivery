@@ -17,6 +17,29 @@ export function useAppState() {
         })
     }
 
+    const handleAddMultipleToCart = (items: { product: Product, quantity: number }[]) => {
+        setCart((prev) => {
+            let nextCart = [...prev];
+            items.forEach(({ product, quantity }) => {
+                const existingIndex = nextCart.findIndex((item) => item.id === product.id);
+                if (existingIndex >= 0) {
+                    nextCart[existingIndex] = {
+                        ...nextCart[existingIndex],
+                        quantity: nextCart[existingIndex].quantity + quantity
+                    };
+                } else {
+                    nextCart.push({
+                        id: product.id,
+                        name: product.nombre,
+                        price: product.precioVenta,
+                        quantity: quantity
+                    });
+                }
+            });
+            return nextCart;
+        });
+    }
+
     const handleUpdateQuantity = (id: number, delta: number) => {
         setCart((prev) => {
             return prev
@@ -45,6 +68,7 @@ export function useAppState() {
         cart,
         cartCount,
         handleAddToCart,
+        handleAddMultipleToCart,
         handleUpdateQuantity,
         handleCheckout
     }

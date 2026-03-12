@@ -22,6 +22,7 @@ export default function App() {
     setActiveTab,
     cart,
     handleAddToCart,
+    handleAddMultipleToCart,
     handleUpdateQuantity,
     handleCheckout
   } = useAppState()
@@ -100,7 +101,7 @@ export default function App() {
       />
 
       <main className="flex-1 h-screen overflow-y-auto scrollbar-hide">
-        {activeTab === "inicio" && <HomeTab onAddToCart={handleAddToCart} />}
+        {activeTab === "inicio" && <HomeTab onAddToCart={handleAddToCart} onAddMultipleToCart={handleAddMultipleToCart} />}
         {activeTab === "pedidos" && <OrdersTab />}
         {activeTab === "cuenta" && <AccountTab onTabChange={setActiveTab} />}
         {activeTab === "direcciones" && <AddressesTab onBack={() => setActiveTab("cuenta")} />}

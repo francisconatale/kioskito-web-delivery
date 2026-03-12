@@ -53,7 +53,7 @@ export function AuthScreen() {
 
             <div className="w-full max-w-sm z-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
                 <div className="text-center mb-10 translate-y-0 group">
-                    <h1 className="text-4xl font-bold tracking-tighter mb-3 bg-gradient-to-br from-foreground to-foreground/50 bg-clip-text text-transparent">
+                    <h1 className="text-4xl font-bold tracking-tighter mb-3 text-primary">
                         Caffres
                     </h1>
                     <p className="text-muted-foreground font-bold uppercase tracking-widest text-[10px] opacity-70">

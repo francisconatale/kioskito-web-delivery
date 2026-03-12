@@ -5,15 +5,21 @@ import { Input } from "@/components/ui/input"
 import { CATEGORIES, Product } from "@/lib/data"
 import { useProducts } from "@/hooks/use-products"
 import { useCategories } from "@/hooks/use-categories"
+import { useActivePromotions } from "@/hooks/use-active-promotions"
+import { apiClient } from "@/lib/api-client"
 
 interface HomeTabProps {
     onAddToCart: (product: Product) => void
+    onAddMultipleToCart?: (items: { product: Product, quantity: number }[]) => void
 }
 
-export function HomeTab({ onAddToCart }: HomeTabProps) {
+export function HomeTab({ onAddToCart, onAddMultipleToCart }: HomeTabProps) {
     const [selectedCategory, setSelectedCategory] = useState("all")
     const [searchQuery, setSearchQuery] = useState("")
     const [submittedSearchQuery, setSubmittedSearchQuery] = useState("") // Only updates API when submitted
+    const [addingPromoId, setAddingPromoId] = useState<number | null>(null)
+
+    const { promotions, loading: loadingPromos } = useActivePromotions()
 
     const {
         products,
@@ -27,6 +33,37 @@ export function HomeTab({ onAddToCart }: HomeTabProps) {
         category: selectedCategory,
         size: 15
     })
+
+    const handlePromoClick = async (promo: any) => {
+        if (!onAddMultipleToCart || addingPromoId !== null) return;
+        setAddingPromoId(promo.id);
+
+        try {
+            if (promo.productos && promo.productos.length > 0) {
+                onAddMultipleToCart(promo.productos);
+                return;
+            }
+
+            const itemsToAdd: { product: Product, quantity: number }[] = [];
+
+            for (const regla of promo.reglas) {
+                if (regla.productoId && regla.cantidadRequerida) {
+                    const { data } = await apiClient.get<Product>(`/productos/${regla.productoId}`);
+                    if (data) {
+                        itemsToAdd.push({ product: data, quantity: regla.cantidadRequerida });
+                    }
+                }
+            }
+
+            if (itemsToAdd.length > 0) {
+                onAddMultipleToCart(itemsToAdd);
+            }
+        } catch (err) {
+            console.error("Error al cargar promoción:", err);
+        } finally {
+            setAddingPromoId(null);
+        }
+    }
 
     const { categories } = useCategories()
 
@@ -87,7 +124,7 @@ export function HomeTab({ onAddToCart }: HomeTabProps) {
                                     className="px-4 pr-10 h-11 bg-card/50 border-border/50 text-base rounded-xl transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
                                 />
                                 {searchQuery && (
-                                    <button 
+                                    <button
                                         onClick={clearSearch}
                                         className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-muted"
                                     >
@@ -107,6 +144,94 @@ export function HomeTab({ onAddToCart }: HomeTabProps) {
             </header>
 
             <div className="max-w-3xl mx-auto px-4 lg:px-6 py-6">
+                {/* Promotions Banner */}
+                {searchQuery === "" && selectedCategory === "all" && (
+                    <div className="mb-10 relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary/90 via-primary to-primary/80 p-6 sm:p-8 shadow-2xl shadow-primary/20 group">
+                        {/* Decorative background elements */}
+                        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-10 rounded-full blur-3xl transform group-hover:scale-150 transition-transform duration-1000"></div>
+                        <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-black opacity-10 rounded-full blur-3xl"></div>
+
+                        <div className="relative z-10 flex flex-col h-full justify-between">
+                            <div className="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 className="text-2xl font-black tracking-tight text-white mb-1">Promociones Exclusivas</h3>
+                                    <p className="text-primary-foreground/80 text-sm font-medium">Aprovechá estos descuentos increíbles</p>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-2 px-2 snap-x">
+                                {loadingPromos ? (
+                                    <div className="flex justify-center items-center w-full h-[130px] sm:h-[150px]">
+                                        <Loader2 className="h-6 w-6 text-white animate-spin" />
+                                    </div>
+                                ) : promotions.length === 0 ? (
+                                    <div className="flex justify-center flex-col items-center w-full h-[130px] sm:h-[150px] text-white/50">
+                                        <p className="text-sm font-medium">No hay promociones activas</p>
+                                    </div>
+                                ) : (
+                                    promotions.map((promo, i) => {
+                                        const backgrounds = [
+                                            "bg-gradient-to-tr from-orange-400 to-amber-300",
+                                            "bg-gradient-to-tr from-rose-400 to-red-500",
+                                            "bg-gradient-to-tr from-indigo-500 to-purple-500",
+                                            "bg-gradient-to-tr from-emerald-400 to-teal-500"
+                                        ]
+                                        const bgClass = backgrounds[i % backgrounds.length]
+                                        const isAdding = addingPromoId === promo.id
+
+                                        return (
+                                            <div
+                                                key={promo.id || i}
+                                                onClick={() => handlePromoClick(promo)}
+                                                className={`relative w-[220px] h-[130px] sm:w-[260px] sm:h-[150px] rounded-2xl overflow-hidden flex-shrink-0 snap-center shadow-lg transform transition-all cursor-pointer group/card ${isAdding ? 'scale-95 opacity-80' : 'hover:-translate-y-1'}`}
+                                            >
+                                                <div className={`absolute inset-0 ${bgClass} opacity-90 group-hover/card:opacity-100 transition-opacity`}></div>
+                                                <div className="absolute inset-0 bg-black/10"></div>
+                                                <div className="relative h-full p-4 flex flex-col justify-between">
+                                                    <div className="flex justify-between items-start">
+                                                        <span className="text-white bg-black/30 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">
+                                                            {promo.tipo === 'DESCUENTO_PORCENTAJE' ? `${promo.valor}% OFF` :
+                                                                promo.tipo === 'COMBO' ? 'Combo Especial' :
+                                                                    promo.tipo === '2X1' ? 'Llevá 2 pagá 1' : 'Promoción'}
+                                                        </span>
+                                                        {isAdding && (
+                                                            <div className="bg-black/30 backdrop-blur-sm p-1.5 rounded-full">
+                                                                <Loader2 className="h-4 w-4 text-white animate-spin" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div>
+                                                        <h4 className="text-white font-bold text-lg leading-tight line-clamp-2 mb-1">{promo.nombre}</h4>
+
+                                                        {promo.precioOriginal !== undefined && promo.precioPromocional !== undefined && (
+                                                            <div className="flex items-center gap-2 mt-2 bg-black/20 self-start inline-flex px-2 py-1 rounded-lg backdrop-blur-sm">
+                                                                <span className="text-white/60 text-xs line-through font-medium">
+                                                                    ${Number(promo.precioOriginal).toFixed(2)}
+                                                                </span>
+                                                                <span className="text-white font-bold text-base">
+                                                                    ${Number(promo.precioPromocional).toFixed(2)}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+                                    })
+                                )}
+                            </div>
+
+                            <div className="mt-4 flex justify-end">
+                                <button className="text-sm font-bold text-white bg-white/20 hover:bg-white/30 backdrop-blur-md px-5 py-2 rounded-xl transition-all flex items-center gap-2">
+                                    Ver todas las promos
+                                    <span className="text-lg leading-none">→</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Categories */}
                 <div className="mb-8">
                     <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-1 px-1">
@@ -209,7 +334,7 @@ export function HomeTab({ onAddToCart }: HomeTabProps) {
                         )}
                     </div>
                 )}
-        </div>
+            </div>
         </div >
     )
 }
