@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { apiClient } from "@/lib/api-client";
 import { Product } from "@/lib/data";
 
@@ -17,8 +17,13 @@ export function useProducts(options: UseProductsOptions = {}) {
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
+    
+    const isFetchingRef = useRef(false);
 
     const fetchProducts = useCallback(async (currentPage: number, isNewSearch: boolean = false) => {
+        if (isFetchingRef.current) return;
+        isFetchingRef.current = true;
+
         try {
             if (isNewSearch) {
                 setLoading(true);
@@ -30,7 +35,6 @@ export function useProducts(options: UseProductsOptions = {}) {
             const isCategorySearch = category !== "all";
             const isTextSearch = searchQuery.trim() !== "";
 
-            // The main /productos endpoint supports both q and categoria parameters simultaneously
             const endpoint = "/productos";
             const params: any = { page: currentPage, size, negocioId: 1 };
 
@@ -58,6 +62,7 @@ export function useProducts(options: UseProductsOptions = {}) {
         } finally {
             setLoading(false);
             setLoadingMore(false);
+            isFetchingRef.current = false;
         }
     }, [searchQuery, category, size]);
 
@@ -68,7 +73,7 @@ export function useProducts(options: UseProductsOptions = {}) {
     }, [fetchProducts]);
 
     const loadMore = useCallback(() => {
-        if (!loading && !loadingMore && hasMore) {
+        if (!loading && !loadingMore && hasMore && !isFetchingRef.current) {
             const nextPage = page + 1;
             setPage(nextPage);
             fetchProducts(nextPage, false);
