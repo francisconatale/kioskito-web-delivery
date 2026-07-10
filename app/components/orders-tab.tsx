@@ -166,8 +166,8 @@ export function OrdersTab() {
                                     <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/5 border border-primary/10">
                                         {order.estado === "ENTREGADO" ? (
                                             <>
-                                                <CheckCircle className="h-3.5 w-3.5 text-green-600" />
-                                                <span className="text-green-600 text-[10px] font-bold uppercase tracking-wide">Completado</span>
+                                                <CheckCircle className="h-3.5 w-3.5 text-success-500" />
+                                                <span className="text-success-500 text-[10px] font-bold uppercase tracking-wide">Completado</span>
                                             </>
                                         ) : order.estado === "CANCELADO" ? (
                                             <>
@@ -176,8 +176,8 @@ export function OrdersTab() {
                                             </>
                                         ) : (
                                             <div className="flex items-center gap-1.5">
-                                                <Clock className="h-3 w-3 text-amber-600" />
-                                                <span className="text-amber-700 text-[10px] font-bold uppercase tracking-wide">
+                                                <Clock className="h-3 w-3 text-amber-500" />
+                                                <span className="text-amber-500 text-[10px] font-bold uppercase tracking-wide">
                                                     {order.estado.replace("_", " ")}
                                                 </span>
                                             </div>

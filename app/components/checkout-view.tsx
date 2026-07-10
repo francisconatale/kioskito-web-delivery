@@ -264,10 +264,10 @@ export function CheckoutView({
                                 {appliedPromotions.map((promo, idx) => (
                                     <div 
                                         key={idx}
-                                        className="flex justify-between text-sm font-semibold text-green-600 bg-green-500/5 px-3 py-1.5 rounded-lg border border-green-500/10"
+                                        className="flex justify-between text-sm font-semibold text-success-500 bg-success-100 px-3 py-1.5 rounded-lg border border-success-100"
                                     >
                                         <span className="flex items-center gap-2">
-                                            <span className="h-1 w-1 rounded-full bg-green-500" />
+                                            <span className="h-1 w-1 rounded-full bg-success-500" />
                                             {promo.nombre}
                                         </span>
                                         <span>-${promo.descuento.toFixed(2)}</span>

@@ -91,10 +91,10 @@ export function OrderTab({
                                 {appliedPromotions.map((promo, idx) => (
                                     <div 
                                         key={idx} 
-                                        className="flex justify-between items-center text-xs font-semibold text-green-600 bg-green-500/5 px-3 py-2 rounded-xl border border-green-500/10"
+                                        className="flex justify-between items-center text-xs font-semibold text-success-500 bg-success-100 px-3 py-2 rounded-xl border border-success-100"
                                     >
                                         <span className="flex items-center gap-2">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                                            <div className="h-1.5 w-1.5 rounded-full bg-success-500 animate-pulse" />
                                             <span className="truncate">{promo.nombre}</span>
                                         </span>
                                         <span>-${promo.descuento.toFixed(2)}</span>

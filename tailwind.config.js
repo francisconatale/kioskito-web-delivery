@@ -21,11 +21,32 @@ module.exports = {
         border: "oklch(var(--border) / <alpha-value>)",
         input: "oklch(var(--input) / <alpha-value>)",
         ring: "oklch(var(--ring) / <alpha-value>)",
-        background: "oklch(var(--background) / <alpha-value>)",
-        foreground: "oklch(var(--foreground) / <alpha-value>)",
+        background: "var(--color-neutral-50)",
+        foreground: "var(--color-neutral-900)",
         primary: {
-          DEFAULT: "oklch(var(--primary) / <alpha-value>)",
-          foreground: "oklch(var(--primary-foreground) / <alpha-value>)",
+          DEFAULT: "var(--color-primary-700)",
+          foreground: "var(--color-white, #FFFFFF)",
+          900: "var(--color-primary-900)",
+          700: "var(--color-primary-700)",
+          500: "var(--color-primary-500)",
+          200: "var(--color-primary-200)",
+          100: "var(--color-primary-100)",
+        },
+        neutral: {
+          900: "var(--color-neutral-900)",
+          600: "var(--color-neutral-600)",
+          200: "var(--color-neutral-200)",
+          50: "var(--color-neutral-50)",
+        },
+        amber: {
+          500: "var(--color-amber-500)",
+        },
+        success: {
+          500: "var(--color-success-500)",
+          100: "var(--color-success-100)",
+        },
+        error: {
+          500: "var(--color-error-500)",
         },
         secondary: {
           DEFAULT: "oklch(var(--secondary) / <alpha-value>)",
@@ -53,12 +74,19 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ["Figtree", "sans-serif"],
+        sans: ["var(--font-body)", "Inter", "sans-serif"],
+        display: ["var(--font-display)", "Sora", "sans-serif"],
+        mono: ["var(--font-mono)", "IBM Plex Mono", "monospace"],
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "var(--radius-lg)",
+        md: "var(--radius-md)",
+        sm: "var(--radius-sm)",
+        full: "var(--radius-full)",
+      },
+      boxShadow: {
+        card: "0 2px 8px rgba(22, 40, 58, 0.08)",
+        modal: "0 8px 24px rgba(22, 40, 58, 0.16)",
       },
       keyframes: {
         "accordion-down": {

@@ -159,7 +159,7 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart }: HomeTabProps) {
             <div className="max-w-3xl mx-auto px-4 lg:px-6 py-6">
                 {/* Promotions Banner */}
                 {searchQuery === "" && selectedCategory === "all" && (
-                    <div className="mb-10 relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary/90 via-primary to-primary/80 p-6 sm:p-8 shadow-2xl shadow-primary/20 group">
+                    <div className="mb-10 relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary-500 via-primary-700 to-primary-900 p-6 sm:p-8 shadow-2xl shadow-primary/20 group">
                         {/* Decorative background elements */}
                         <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-10 rounded-full blur-3xl transform group-hover:scale-150 transition-transform duration-1000"></div>
                         <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-black opacity-10 rounded-full blur-3xl"></div>
@@ -321,7 +321,9 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart }: HomeTabProps) {
                     </div>
                 ) : displayedProducts.length === 0 ? (
                     <div className="text-center py-20">
-                        <div className="text-4xl mb-4">🔍</div>
+                        <div className="flex justify-center mb-4">
+                            <Search className="h-12 w-12 text-primary/40" />
+                        </div>
                         <p className="text-muted-foreground text-sm font-medium">No encontramos productos que coincidan.</p>
                         <button onClick={clearSearch} className="text-primary text-sm font-semibold mt-2 hover:underline">Ver todo el catálogo</button>
                     </div>
