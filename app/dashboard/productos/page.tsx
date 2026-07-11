@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, Search, Edit2, X, Save, Plus, Trash2 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
+import { toast } from 'sonner';
 
 export default function ProductosDeliveryPage() {
   const [productos, setProductos] = useState<any[]>([]);
@@ -17,6 +18,12 @@ export default function ProductosDeliveryPage() {
   const [posCategorias, setPosCategorias] = useState<any[]>([]);
   const [selectedPosCategory, setSelectedPosCategory] = useState("");
   const [posLoading, setPosLoading] = useState(false);
+
+  // Bulk Add state
+  const [selectedPosProducts, setSelectedPosProducts] = useState<number[]>([]);
+  const [isBulkConfigModalOpen, setIsBulkConfigModalOpen] = useState(false);
+  const [bulkCategory, setBulkCategory] = useState("");
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
@@ -68,6 +75,7 @@ export default function ProductosDeliveryPage() {
     setIsAddModalOpen(true);
     setPosSearch("");
     setSelectedPosCategory("");
+    setSelectedPosProducts([]);
     // Fetch initial POS products & categories
     try {
       setPosLoading(true);
@@ -162,6 +170,37 @@ export default function ProductosDeliveryPage() {
       await fetchDeliveryData();
     } catch (error) {
       alert("Error al eliminar del delivery.");
+    }
+  };
+
+  const handleBulkEnable = async () => {
+    if (selectedPosProducts.length === 0) return;
+    
+    try {
+      setBulkLoading(true);
+      const payload = {
+        productoIds: selectedPosProducts,
+        mostrarEnApp: true,
+        categoriaDeliveryId: bulkCategory ? Number(bulkCategory) : null
+      };
+      
+      await apiClient.post('/productos-delivery/bulk', payload);
+      
+      toast.success("Se están configurando los productos en segundo plano. Los cambios se reflejarán en breve.");
+      
+      setSelectedPosProducts([]);
+      setIsBulkConfigModalOpen(false);
+      setIsAddModalOpen(false);
+      
+      setTimeout(() => {
+        fetchDeliveryData();
+      }, 1000);
+      
+    } catch (error) {
+      console.error("Error bulk enable", error);
+      toast.error("Ocurrió un problema enviando los datos.");
+    } finally {
+      setBulkLoading(false);
     }
   };
 
@@ -297,9 +336,23 @@ export default function ProductosDeliveryPage() {
                 
                 return filteredPosProducts.map(prod => (
                   <div key={prod.id} className="py-3 flex items-center justify-between group">
-                    <div>
-                      <h4 className="font-bold text-neutral-900 text-sm">{prod.nombre}</h4>
-                      <div className="text-xs text-neutral-500 mt-0.5">${prod.precioVenta?.parsedValue ?? prod.precioVenta ?? 0} • Stock: {prod.stock?.parsedValue ?? prod.stock ?? 'N/A'}</div>
+                    <div className="flex items-center gap-3">
+                      <input 
+                        type="checkbox" 
+                        className="w-4 h-4 rounded border-neutral-300 accent-blue-600 cursor-pointer"
+                        checked={selectedPosProducts.includes(prod.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedPosProducts([...selectedPosProducts, prod.id]);
+                          } else {
+                            setSelectedPosProducts(selectedPosProducts.filter(id => id !== prod.id));
+                          }
+                        }}
+                      />
+                      <div>
+                        <h4 className="font-bold text-neutral-900 text-sm">{prod.nombre}</h4>
+                        <div className="text-xs text-neutral-500 mt-0.5">${prod.precioVenta?.parsedValue ?? prod.precioVenta ?? 0} • Stock: {prod.stock?.parsedValue ?? prod.stock ?? 'N/A'}</div>
+                      </div>
                     </div>
                     <button 
                       onClick={() => openConfigModal(prod)}
@@ -311,6 +364,19 @@ export default function ProductosDeliveryPage() {
                 ));
               })()}
             </div>
+
+            {/* Floating Bulk Action Bar */}
+            {selectedPosProducts.length > 0 && (
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-neutral-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-4 z-[65] animate-in slide-in-from-bottom-4">
+                <span className="font-bold text-sm whitespace-nowrap">{selectedPosProducts.length} seleccionados</span>
+                <button 
+                  onClick={() => setIsBulkConfigModalOpen(true)}
+                  className="bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-full text-sm font-bold transition-colors whitespace-nowrap"
+                >
+                  Habilitar en Delivery
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -393,6 +459,57 @@ export default function ProductosDeliveryPage() {
                 className="px-6 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
               >
                 <Save className="w-4 h-4" /> {modalLoading ? 'Guardando...' : 'Guardar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Modal: Bulk Config */}
+      {isBulkConfigModalOpen && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-neutral-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="px-6 py-4 border-b border-neutral-100 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-neutral-900">Habilitar múltiples productos</h2>
+              <button onClick={() => setIsBulkConfigModalOpen(false)} className="p-1 text-neutral-400 hover:text-neutral-700 rounded-lg hover:bg-neutral-100 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-5">
+              <div className="bg-amber-50 text-amber-800 p-4 rounded-xl text-sm font-medium border border-amber-200">
+                Estás por publicar {selectedPosProducts.length} productos en la aplicación de delivery.
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-neutral-900 mb-1.5">Categoría (Opcional)</label>
+                <select 
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 outline-none text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+                  value={bulkCategory}
+                  onChange={(e) => setBulkCategory(e.target.value)}
+                >
+                  <option value="">Sin categoría asignada...</option>
+                  {categorias.map(c => (
+                    <option key={c.id} value={c.id}>{c.nombre || c.name}</option>
+                  ))}
+                </select>
+                <p className="text-xs text-neutral-500 mt-1">Todos los productos seleccionados se asignarán a esta categoría.</p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-neutral-50 border-t border-neutral-100 flex justify-end gap-3">
+              <button 
+                onClick={() => setIsBulkConfigModalOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-200 rounded-lg transition-colors"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={handleBulkEnable}
+                disabled={bulkLoading}
+                className="px-6 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
+              >
+                <Save className="w-4 h-4" /> {bulkLoading ? 'Enviando...' : 'Confirmar'}
               </button>
             </div>
           </div>
