@@ -334,34 +334,60 @@ export default function ProductosDeliveryPage() {
                 if (posLoading) return <div className="text-center text-neutral-500 py-8">Buscando productos...</div>;
                 if (filteredPosProducts.length === 0) return <div className="text-center text-neutral-500 py-8">No se encontraron productos disponibles en el POS.</div>;
                 
-                return filteredPosProducts.map(prod => (
-                  <div key={prod.id} className="py-3 flex items-center justify-between group">
-                    <div className="flex items-center gap-3">
+                const allSelected = filteredPosProducts.length > 0 && filteredPosProducts.every(p => selectedPosProducts.includes(p.id));
+
+                return (
+                  <>
+                    <div className="flex items-center gap-3 pb-3">
                       <input 
                         type="checkbox" 
                         className="w-4 h-4 rounded border-neutral-300 accent-blue-600 cursor-pointer"
-                        checked={selectedPosProducts.includes(prod.id)}
+                        checked={allSelected}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedPosProducts([...selectedPosProducts, prod.id]);
+                            const newSelected = [...selectedPosProducts];
+                            filteredPosProducts.forEach(p => {
+                              if (!newSelected.includes(p.id)) newSelected.push(p.id);
+                            });
+                            setSelectedPosProducts(newSelected);
                           } else {
-                            setSelectedPosProducts(selectedPosProducts.filter(id => id !== prod.id));
+                            const filteredIds = new Set(filteredPosProducts.map(p => p.id));
+                            setSelectedPosProducts(selectedPosProducts.filter(id => !filteredIds.has(id)));
                           }
                         }}
                       />
-                      <div>
-                        <h4 className="font-bold text-neutral-900 text-sm">{prod.nombre}</h4>
-                        <div className="text-xs text-neutral-500 mt-0.5">${prod.precioVenta?.parsedValue ?? prod.precioVenta ?? 0} • Stock: {prod.stock?.parsedValue ?? prod.stock ?? 'N/A'}</div>
-                      </div>
+                      <span className="text-sm font-bold text-neutral-700">Seleccionar todos ({filteredPosProducts.length})</span>
                     </div>
-                    <button 
-                      onClick={() => openConfigModal(prod)}
-                      className="px-4 py-1.5 bg-neutral-900 text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100"
-                    >
-                      Configurar
-                    </button>
-                  </div>
-                ));
+                    {filteredPosProducts.map(prod => (
+                      <div key={prod.id} className="py-3 flex items-center justify-between group border-t border-neutral-100">
+                        <div className="flex items-center gap-3">
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 rounded border-neutral-300 accent-blue-600 cursor-pointer"
+                            checked={selectedPosProducts.includes(prod.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedPosProducts([...selectedPosProducts, prod.id]);
+                              } else {
+                                setSelectedPosProducts(selectedPosProducts.filter(id => id !== prod.id));
+                              }
+                            }}
+                          />
+                          <div>
+                            <h4 className="font-bold text-neutral-900 text-sm">{prod.nombre}</h4>
+                            <div className="text-xs text-neutral-500 mt-0.5">${prod.precioVenta?.parsedValue ?? prod.precioVenta ?? 0} • Stock: {prod.stock?.parsedValue ?? prod.stock ?? 'N/A'}</div>
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => openConfigModal(prod)}
+                          className="px-4 py-1.5 bg-neutral-900 text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100"
+                        >
+                          Configurar
+                        </button>
+                      </div>
+                    ))}
+                  </>
+                );
               })()}
             </div>
 
