@@ -43,7 +43,12 @@ export function AddressesTab({ onBack }: AddressesTabProps) {
         setIsAdding(true)
         try {
             const added = await addressService.addAddress(newAddress.trim())
-            setAddresses(prev => [...prev, added])
+            if (added && typeof added === 'object' && 'id' in added) {
+                setAddresses(prev => [...prev, added])
+            } else {
+                const updated = await addressService.getAddresses()
+                setAddresses(updated)
+            }
             setNewAddress("")
             toast({ title: "Dirección agregada", description: "Tu nueva dirección se guardó correctamente." })
         } catch (error: any) {

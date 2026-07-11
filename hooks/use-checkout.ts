@@ -8,6 +8,7 @@ export interface CheckoutFormData {
     telefonoContacto: string;
     direccionEntrega: string;
     observaciones: string;
+    metodoPago: string;
 }
 
 export function useCheckout() {
@@ -25,6 +26,7 @@ export function useCheckout() {
                 telefonoContacto: formData.telefonoContacto,
                 direccionEntrega: formData.direccionEntrega,
                 observaciones: formData.observaciones,
+                metodoPago: formData.metodoPago,
                 costoDelivery: 0, // Según el caso
                 items: cart.map(item => ({
                     productoId: item.id,

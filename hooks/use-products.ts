@@ -35,17 +35,14 @@ export function useProducts(options: UseProductsOptions = {}) {
             const isCategorySearch = category !== "all";
             const isTextSearch = searchQuery.trim() !== "";
 
-            const endpoint = "/productos";
+            const endpoint = "/productos-delivery";
             const params: any = { page: currentPage, size, negocioId: 1 };
 
             if (isTextSearch) {
-                params.q = searchQuery;
+                params.search = searchQuery;
             }
             if (isCategorySearch) {
-                params.categoria = category;
-            }
-            if (!isTextSearch && !isCategorySearch) {
-                params.activado = true;
+                params.categoriaDeliveryId = category;
             }
 
             const { data } = await apiClient.get<any>(endpoint, { params });

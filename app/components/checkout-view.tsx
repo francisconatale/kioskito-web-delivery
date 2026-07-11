@@ -34,7 +34,8 @@ export function CheckoutView({
         dniCliente: authUser?.dni || "",
         telefonoContacto: authUser?.telefono || "",
         direccionEntrega: authUser?.direccion || "",
-        observaciones: ""
+        observaciones: "",
+        metodoPago: ""
     })
 
     const [addresses, setAddresses] = useState<Address[]>([])
@@ -78,7 +79,7 @@ export function CheckoutView({
         }
     }, [authUser, authState])
 
-    const isFormValid = formData.nombreCliente.trim() !== "" && formData.direccionEntrega.trim() !== ""
+    const isFormValid = formData.nombreCliente.trim() !== "" && formData.direccionEntrega.trim() !== "" && formData.metodoPago !== ""
 
     return (
         <div className="min-h-screen bg-background pb-32 lg:pb-8 selection:bg-primary/20 animate-in fade-in duration-300">
@@ -240,6 +241,23 @@ export function CheckoutView({
                                             required 
                                         />
                                     )}
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">Método de Pago *</label>
+                                    <select 
+                                        value={formData.metodoPago} 
+                                        onChange={(e) => setFormData({...formData, metodoPago: e.target.value})} 
+                                        className="flex h-12 w-full rounded-xl border border-border/50 bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2"
+                                        required
+                                    >
+                                        <option value="" disabled>Seleccioná un método de pago</option>
+                                        <option value="EFECTIVO">Efectivo</option>
+                                        <option value="DEBITO">Débito</option>
+                                        <option value="CREDITO">Crédito</option>
+                                        <option value="TRANSFERENCIA">Transferencia</option>
+                                        <option value="FIADO">Fiado</option>
+                                        <option value="MIXTO">Mixto</option>
+                                    </select>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">Observaciones</label>

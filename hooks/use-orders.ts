@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { apiClient, isOfflineError } from "@/lib/api-client";
 
 export interface OrderItem {
@@ -28,12 +28,27 @@ export interface Order {
     detalles: OrderItem[];
 }
 
+interface PaginatedResponse {
+    content: Order[];
+    totalElements: number;
+    totalPages: number;
+    number: number;
+    size: number;
+}
+
+const PAGE_SIZE = 10;
+
 export function useOrders() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalElements, setTotalElements] = useState(0);
+    const pageRef = useRef(0);
 
-    const fetchOrders = useCallback(async () => {
+    const fetchOrders = useCallback(async (targetPage?: number) => {
+        const p = targetPage ?? pageRef.current;
         try {
             setLoading(true);
             setError(null);
@@ -45,8 +60,26 @@ export function useOrders() {
                 return;
             }
 
-            const response = await apiClient.get<Order[]>("/delivery/pedidos/mis-pedidos");
-            setOrders(response.data || []);
+            const response = await apiClient.get<PaginatedResponse | Order[]>("/delivery/pedidos/mis-pedidos", {
+                params: { page: p, size: PAGE_SIZE, sort: "fechaCreacion,desc" },
+            });
+
+            const data = response.data;
+            if (Array.isArray(data)) {
+                setOrders(data);
+                setTotalPages(1);
+                setTotalElements(data.length);
+            } else if (data && "content" in data) {
+                setOrders(data.content || []);
+                setTotalPages(data.totalPages || 1);
+                setTotalElements(data.totalElements || 0);
+                setPage(data.number || 0);
+                pageRef.current = data.number || 0;
+            } else {
+                setOrders([]);
+                setTotalPages(1);
+                setTotalElements(0);
+            }
         } catch (err: any) {
             console.error("Error fetching orders:", err);
             if (isOfflineError(err)) {
@@ -62,8 +95,35 @@ export function useOrders() {
     }, []);
 
     useEffect(() => {
-        fetchOrders();
+        fetchOrders(0);
     }, [fetchOrders]);
 
-    return { orders, loading, error, refetch: fetchOrders };
+    const goToPage = useCallback((targetPage: number) => {
+        fetchOrders(targetPage);
+    }, [fetchOrders]);
+
+    const nextPage = useCallback(() => {
+        if (page < totalPages - 1) {
+            fetchOrders(page + 1);
+        }
+    }, [page, totalPages, fetchOrders]);
+
+    const prevPage = useCallback(() => {
+        if (page > 0) {
+            fetchOrders(page - 1);
+        }
+    }, [page, fetchOrders]);
+
+    return {
+        orders,
+        loading,
+        error,
+        page,
+        totalPages,
+        totalElements,
+        nextPage,
+        prevPage,
+        goToPage,
+        refetch: () => fetchOrders(),
+    };
 }

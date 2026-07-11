@@ -15,7 +15,7 @@ export function useCategories() {
         const fetchCategories = async () => {
             try {
                 setLoading(true);
-                const { data } = await apiClient.get<any>("/categoria", {
+                const { data } = await apiClient.get<any>("/categorias-delivery", {
                     params: { negocioId: 1 }
                 });
                 
