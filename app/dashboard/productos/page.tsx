@@ -14,6 +14,8 @@ export default function ProductosDeliveryPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [posSearch, setPosSearch] = useState("");
   const [posProducts, setPosProducts] = useState<any[]>([]);
+  const [posCategorias, setPosCategorias] = useState<any[]>([]);
+  const [selectedPosCategory, setSelectedPosCategory] = useState("");
   const [posLoading, setPosLoading] = useState(false);
 
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
@@ -65,31 +67,50 @@ export default function ProductosDeliveryPage() {
   const handleOpenAddModal = async () => {
     setIsAddModalOpen(true);
     setPosSearch("");
-    // Fetch initial POS products
+    setSelectedPosCategory("");
+    // Fetch initial POS products & categories
     try {
       setPosLoading(true);
-      const { data } = await apiClient.get('/productos', { params: { size: 15, negocioId: 1 } });
+      const [prodRes, catRes] = await Promise.all([
+        apiClient.get('/productos', { params: { size: 15, negocioId: 1 } }),
+        apiClient.get('/categoria')
+      ]);
+      const pData = prodRes.data;
+      const cData = catRes.data;
+      setPosProducts(Array.isArray(pData) ? pData : (pData?.content || (pData as any)?.data || []));
+      setPosCategorias(Array.isArray(cData) ? cData : (cData?.content || (cData as any)?.data || []));
+    } catch (err) {} finally {
+      setPosLoading(false);
+    }
+  };
+
+  const fetchPosProductsFiltered = async (searchStr: string, categoryId: string) => {
+    try {
+      setPosLoading(true);
+      const params: any = { negocioId: 1, size: 15 };
+      if (categoryId) params.categoria = categoryId;
+      if (searchStr.length > 2) params.q = searchStr;
+
+      // We use /productos as it supports both q and categoria
+      const { data } = await apiClient.get('/productos', { params });
       setPosProducts(Array.isArray(data) ? data : (data?.content || (data as any)?.data || []));
     } catch (err) {} finally {
       setPosLoading(false);
     }
   };
 
-  const handlePosSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePosSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setPosSearch(val);
-    if (val.length > 2) {
-      try {
-        const { data } = await apiClient.get('/productos/buscar', { params: { q: val, negocioId: 1 } });
-        setPosProducts(Array.isArray(data) ? data : (data?.content || (data as any)?.data || []));
-      } catch (err) {}
-    } else if (val.length === 0) {
-      // Reload default
-      try {
-        const { data } = await apiClient.get('/productos', { params: { size: 15, negocioId: 1 } });
-        setPosProducts(Array.isArray(data) ? data : (data?.content || (data as any)?.data || []));
-      } catch (err) {}
+    if (val.length > 2 || val.length === 0) {
+      fetchPosProductsFiltered(val, selectedPosCategory);
     }
+  };
+
+  const handlePosCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    setSelectedPosCategory(val);
+    fetchPosProductsFiltered(posSearch, val);
   };
 
   // --- Config Modal ---
@@ -240,8 +261,8 @@ export default function ProductosDeliveryPage() {
               </button>
             </div>
             
-            <div className="p-4 border-b border-neutral-100 bg-neutral-50 shrink-0">
-              <div className="relative">
+            <div className="p-4 border-b border-neutral-100 bg-neutral-50 shrink-0 flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
                 <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input 
                   type="text" 
@@ -252,15 +273,29 @@ export default function ProductosDeliveryPage() {
                   autoFocus
                 />
               </div>
+              <div className="sm:w-48 shrink-0">
+                <select 
+                  className="w-full bg-white border border-neutral-200 rounded-xl px-3 py-2.5 outline-none text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-sm"
+                  value={selectedPosCategory}
+                  onChange={handlePosCategoryChange}
+                >
+                  <option value="">Todas las categorías</option>
+                  {posCategorias.map(c => (
+                    <option key={c.id} value={c.id}>{c.nombre || c.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 divide-y divide-neutral-100">
-              {posLoading ? (
-                <div className="text-center text-neutral-500 py-8">Buscando productos...</div>
-              ) : posProducts.length === 0 ? (
-                <div className="text-center text-neutral-500 py-8">No se encontraron productos en el POS.</div>
-              ) : (
-                posProducts.map(prod => (
+              {(() => {
+                const existingProductIds = new Set(productos.map(p => p.id));
+                const filteredPosProducts = posProducts.filter(p => !existingProductIds.has(p.id));
+
+                if (posLoading) return <div className="text-center text-neutral-500 py-8">Buscando productos...</div>;
+                if (filteredPosProducts.length === 0) return <div className="text-center text-neutral-500 py-8">No se encontraron productos disponibles en el POS.</div>;
+                
+                return filteredPosProducts.map(prod => (
                   <div key={prod.id} className="py-3 flex items-center justify-between group">
                     <div>
                       <h4 className="font-bold text-neutral-900 text-sm">{prod.nombre}</h4>
@@ -273,8 +308,8 @@ export default function ProductosDeliveryPage() {
                       Configurar
                     </button>
                   </div>
-                ))
-              )}
+                ));
+              })()}
             </div>
           </div>
         </div>
