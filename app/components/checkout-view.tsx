@@ -93,7 +93,7 @@ export function CheckoutView({
                             <button onClick={onBack} className="p-2 -ml-2 hover:bg-muted rounded-xl transition-colors">
                                 <ArrowLeft className="h-5 w-5" />
                             </button>
-                            <h1 className="text-lg font-bold tracking-tight">Checkout Seguro</h1>
+                            <h1 className="text-lg font-bold tracking-tight">Checkout</h1>
                         </div>
                     </div>
                 </header>

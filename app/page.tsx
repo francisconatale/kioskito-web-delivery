@@ -101,20 +101,18 @@ export default function App() {
       />
 
       <main className="flex-1 h-screen overflow-y-auto scrollbar-hide">
-        {activeTab === "inicio" && <HomeTab onAddToCart={handleAddToCart} onAddMultipleToCart={handleAddMultipleToCart} />}
+        {activeTab === "inicio" && (
+            <HomeTab 
+                onAddToCart={handleAddToCart} 
+                onAddMultipleToCart={handleAddMultipleToCart} 
+                cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
+                onCheckout={() => setShowCheckout(true)}
+            />
+        )}
         {activeTab === "pedidos" && <OrdersTab />}
         {activeTab === "cuenta" && <AccountTab onTabChange={setActiveTab} />}
         {activeTab === "direcciones" && <AddressesTab onBack={() => setActiveTab("cuenta")} />}
       </main>
-
-      {activeTab === "inicio" && (
-        <FloatingCart 
-          cart={cart} 
-          total={promotionalTotal} 
-          onCheckout={() => setShowCheckout(true)} 
-          loading={loadingPromos}
-        />
-      )}
 
       <BottomNav
         activeTab={activeTab}
