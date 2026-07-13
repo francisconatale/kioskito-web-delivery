@@ -296,7 +296,7 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart, cartCount = 0, onChe
                                         {product.image ? (
                                             <Image src={product.image} alt={product.nombre} fill className="object-cover" />
                                         ) : (
-                                            <span className="text-xl">📦</span>
+                                            <span className="text-lg font-bold text-neutral-300">{product.nombre.charAt(0).toUpperCase()}</span>
                                         )}
                                     </div>
                                     <div className="ml-3 flex-1 min-w-0">
