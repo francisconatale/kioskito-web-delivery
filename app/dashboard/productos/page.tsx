@@ -18,6 +18,9 @@ export default function ProductosDeliveryPage() {
   const [posCategorias, setPosCategorias] = useState<any[]>([]);
   const [selectedPosCategory, setSelectedPosCategory] = useState("");
   const [posLoading, setPosLoading] = useState(false);
+  const [posPage, setPosPage] = useState(0);
+  const [hasMorePos, setHasMorePos] = useState(true);
+  const [isAppendingPos, setIsAppendingPos] = useState(false);
 
   // Bulk Add state
   const [selectedPosProducts, setSelectedPosProducts] = useState<number[]>([]);
@@ -76,34 +79,47 @@ export default function ProductosDeliveryPage() {
     setPosSearch("");
     setSelectedPosCategory("");
     setSelectedPosProducts([]);
+    setPosPage(0);
+    setHasMorePos(true);
     // Fetch initial POS products & categories
     try {
       setPosLoading(true);
       const [prodRes, catRes] = await Promise.all([
-        apiClient.get('/productos', { params: { size: 15, negocioId: 1 } }),
+        apiClient.get('/productos', { params: { size: 20, page: 0, negocioId: 1 } }),
         apiClient.get('/categoria')
       ]);
       const pData = prodRes.data;
       const cData = catRes.data;
-      setPosProducts(Array.isArray(pData) ? pData : (pData?.content || (pData as any)?.data || []));
+      const initialProducts = Array.isArray(pData) ? pData : (pData?.content || (pData as any)?.data || []);
+      setPosProducts(initialProducts);
+      setHasMorePos(initialProducts.length >= 20);
       setPosCategorias(Array.isArray(cData) ? cData : (cData?.content || (cData as any)?.data || []));
     } catch (err) {} finally {
       setPosLoading(false);
     }
   };
 
-  const fetchPosProductsFiltered = async (searchStr: string, categoryId: string) => {
+  const fetchPosProductsFiltered = async (searchStr: string, categoryId: string, page = 0, append = false) => {
     try {
-      setPosLoading(true);
-      const params: any = { negocioId: 1, size: 15 };
+      if (!append) setPosLoading(true);
+      const params: any = { negocioId: 1, size: 20, page: page };
       if (categoryId) params.categoria = categoryId;
       if (searchStr.length > 2) params.q = searchStr;
 
       // We use /productos as it supports both q and categoria
       const { data } = await apiClient.get('/productos', { params });
-      setPosProducts(Array.isArray(data) ? data : (data?.content || (data as any)?.data || []));
+      const newItems = Array.isArray(data) ? data : (data?.content || (data as any)?.data || []);
+      
+      if (append) {
+        setPosProducts(prev => [...prev, ...newItems]);
+      } else {
+        setPosProducts(newItems);
+      }
+      
+      setHasMorePos(newItems.length >= 20);
+      setPosPage(page);
     } catch (err) {} finally {
-      setPosLoading(false);
+      if (!append) setPosLoading(false);
     }
   };
 
@@ -111,14 +127,30 @@ export default function ProductosDeliveryPage() {
     const val = e.target.value;
     setPosSearch(val);
     if (val.length > 2 || val.length === 0) {
-      fetchPosProductsFiltered(val, selectedPosCategory);
+      fetchPosProductsFiltered(val, selectedPosCategory, 0, false);
     }
   };
 
   const handlePosCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
     setSelectedPosCategory(val);
-    fetchPosProductsFiltered(posSearch, val);
+    fetchPosProductsFiltered(posSearch, val, 0, false);
+  };
+
+  const handleScrollPos = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop <= clientHeight + 50) {
+      if (hasMorePos && !posLoading && !isAppendingPos) {
+        loadMorePosProducts();
+      }
+    }
+  };
+
+  const loadMorePosProducts = async () => {
+    if (isAppendingPos || !hasMorePos) return;
+    setIsAppendingPos(true);
+    await fetchPosProductsFiltered(posSearch, selectedPosCategory, posPage + 1, true);
+    setIsAppendingPos(false);
   };
 
   // --- Config Modal ---
@@ -326,7 +358,7 @@ export default function ProductosDeliveryPage() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 divide-y divide-neutral-100">
+            <div className="flex-1 overflow-y-auto p-4 divide-y divide-neutral-100" onScroll={handleScrollPos}>
               {(() => {
                 const existingProductIds = new Set(productos.map(p => p.id));
                 const filteredPosProducts = posProducts.filter(p => !existingProductIds.has(p.id));
@@ -386,6 +418,7 @@ export default function ProductosDeliveryPage() {
                         </button>
                       </div>
                     ))}
+                    {isAppendingPos && <div className="py-4 text-center text-neutral-500 text-sm">Cargando más...</div>}
                   </>
                 );
               })()}

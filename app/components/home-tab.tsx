@@ -31,16 +31,17 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart, cartCount = 0, onChe
     const { promotions, loading: loadingPromos } = useActivePromotions()
 
     useEffect(() => {
-        if (user) {
-            addressService.getAddresses().then(addresses => {
-                if (addresses && addresses.length > 0) {
-                    setActiveAddress(addresses[0].direccion)
-                } else {
-                    setActiveAddress("") 
+        const handler = setTimeout(() => {
+            if (searchQuery !== submittedSearchQuery) {
+                if (searchQuery) {
+                    setSelectedPromo(null);
                 }
-            }).catch(console.error)
-        }
-    }, [user])
+                setSubmittedSearchQuery(searchQuery);
+            }
+        }, 300);
+
+        return () => clearTimeout(handler);
+    }, [searchQuery, submittedSearchQuery]);
 
     const {
         products,
@@ -67,29 +68,25 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart, cartCount = 0, onChe
                 promo.productos.forEach((p: any) => {
                     if (p.product) allProductsForPromo.push(p.product);
                 });
+            } else if (promo.productoIds && promo.productoIds.length > 0) {
+                // Fetch products by IDs
+                const fetchedProducts = await Promise.all(
+                    promo.productoIds.map(async (id: number) => {
+                        try {
+                            const { data } = await apiClient.get<any>(`/productos-delivery/${id}`);
+                            return data;
+                        } catch (err) {
+                            console.error(`Error fetching product ${id}:`, err);
+                            return null;
+                        }
+                    })
+                );
+                
+                fetchedProducts.forEach(p => {
+                    if (p) allProductsForPromo.push(p);
+                });
             }
 
-            const rulesWithCategories = promo.reglas.filter((r: any) => r.categoriaNombre || r.categoriaId);
-            if (rulesWithCategories.length > 0) {
-                hasCategories = true;
-                for (const rule of rulesWithCategories) {
-                    const { data } = await apiClient.get<any>('/productos', {
-                        params: {
-                            categoriaId: rule.categoriaId,
-                            categoria: rule.categoriaNombre?.toUpperCase(),
-                            negocioId: 1,
-                            size: 100
-                        }
-                    });
-
-                    const items: Product[] = Array.isArray(data) ? data : (data?.data || data?.content || []);
-                    items.forEach(item => {
-                        if (!allProductsForPromo.find(p => p.id === item.id)) {
-                            allProductsForPromo.push(item);
-                        }
-                    });
-                }
-            }
 
             setSelectedPromo({
                 ...promo,
@@ -115,13 +112,14 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart, cartCount = 0, onChe
         : products;
 
     const handleSearch = () => {
+        setSelectedPromo(null)
         setSubmittedSearchQuery(searchQuery)
     }
 
     const clearSearch = () => {
         setSearchQuery("")
         setSubmittedSearchQuery("")
-        setSelectedCategory("all")
+        setSelectedPromo(null)
     }
 
     const handleAddToCartClick = (product: any, e?: React.MouseEvent) => {
@@ -134,6 +132,14 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart, cartCount = 0, onChe
     }
 
     const displayAddress = activeAddress !== undefined ? activeAddress : user?.direccion;
+
+    // Helper function to find promotion for a product
+    const getPromoForProduct = (productId: number) => {
+        return promotions.find(promo =>
+            promo.productos?.some((p: any) => p.product?.id === productId) ||
+            promo.productoIds?.includes(productId)
+        );
+    };
 
     return (
         <div className="pb-32 lg:pb-8 selection:bg-primary/20 bg-primary-50 min-h-screen font-sans relative overflow-x-hidden">
@@ -183,7 +189,7 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart, cartCount = 0, onChe
 
                     {/* Search Bar */}
                     <div className="bg-black/20 backdrop-blur-xl p-3 rounded-2xl shadow-inner w-full flex items-center border border-white/10 focus-within:bg-white/20 focus-within:border-white/30 transition-all group">
-                        <Search className="text-white/70 group-focus-within:text-white w-5 h-5 ml-1 shrink-0 transition-colors" />
+                        <Search className="text-white/70 group-focus-within:text-white w-5 h-5 ml-1 shrink-0 transition-colors cursor-pointer" onClick={handleSearch} />
                         <input 
                             className="bg-transparent border-none outline-none text-sm ml-3 w-full text-white placeholder:text-white/50 transition-colors" 
                             placeholder="Buscar..." 
@@ -235,24 +241,27 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart, cartCount = 0, onChe
                 )}
 
                 {/* Categorías */}
-                {searchQuery === "" && !selectedPromo && (
+                {!selectedPromo && (
                     <div className="mb-6">
                         <div className="flex justify-between items-end mb-3">
                             <h2 className="font-display font-bold text-xl text-neutral-900">Categorías</h2>
-                            {selectedCategory !== "all" && (
-                                <span onClick={() => setSelectedCategory("all")} className="text-primary-700 font-bold text-xs cursor-pointer">Ver todas</span>
-                            )}
                         </div>
-                        <div className="flex gap-3 overflow-x-auto pb-4 -mx-5 px-5 scrollbar-hide">
+                        <div className="flex gap-2 overflow-x-auto pb-2 -mx-5 px-5 scrollbar-hide">
+                            <div 
+                                onClick={() => setSelectedCategory("all")}
+                                className={`shrink-0 px-4 py-2 rounded-full text-sm font-bold cursor-pointer transition-all ${selectedCategory === "all" ? 'bg-primary-700 text-white shadow-md' : 'bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50'}`}
+                            >
+                                Todas
+                            </div>
                             {categories.map((cat) => {
                                 const isSelected = selectedCategory === cat.id.toString();
                                 return (
                                     <div 
                                         key={cat.id} 
                                         onClick={() => setSelectedCategory(cat.id.toString())}
-                                        className={`shrink-0 w-28 h-28 rounded-2xl p-3 flex flex-col justify-end cursor-pointer transition-all ${isSelected ? 'bg-primary-700 text-white shadow-lg shadow-primary-700/30' : 'bg-white text-neutral-900 shadow-sm hover:shadow-md'}`}
+                                        className={`shrink-0 px-4 py-2 rounded-full text-sm font-bold cursor-pointer transition-all ${isSelected ? 'bg-primary-700 text-white shadow-md' : 'bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50'}`}
                                     >
-                                        <span className="font-bold text-base leading-tight">{cat.nombre}</span>
+                                        {cat.nombre}
                                     </div>
                                 )
                             })}
@@ -284,31 +293,45 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart, cartCount = 0, onChe
                         </h2>
                     </div>
                     
-                    {loading && !selectedPromo ? (
+                    {(loading || searchQuery !== submittedSearchQuery) && !selectedPromo ? (
                         <div className="flex justify-center py-10"><Loader2 className="w-8 h-8 text-primary-700 animate-spin" /></div>
                     ) : displayedProducts.length === 0 ? (
                         <div className="text-center py-10 text-neutral-500 text-sm">No encontramos productos.</div>
                     ) : (
                         <div className="flex flex-col gap-3">
-                            {displayedProducts.map((product: any) => (
-                                <div key={product.id} className="bg-white p-2.5 rounded-2xl flex items-center shadow-sm relative group cursor-pointer hover:shadow-md transition-shadow" onClick={() => onAddToCart(product)}>
-                                    <div className="w-14 h-14 rounded-xl bg-neutral-100 overflow-hidden shrink-0 flex items-center justify-center relative">
-                                        {product.image ? (
-                                            <Image src={product.image} alt={product.nombre} fill className="object-cover" />
-                                        ) : (
-                                            <span className="text-lg font-bold text-neutral-300">{product.nombre.charAt(0).toUpperCase()}</span>
-                                        )}
+                            {displayedProducts.map((product: any) => {
+                                const promo = getPromoForProduct(product.id);
+                                return (
+                                    <div key={product.id} className="bg-white p-2.5 rounded-2xl flex items-center shadow-sm relative group cursor-pointer hover:shadow-md transition-shadow" onClick={(e) => handleAddToCartClick(product, e as unknown as React.MouseEvent)}>
+                                        <div className="w-14 h-14 rounded-xl bg-neutral-100 overflow-hidden shrink-0 flex items-center justify-center relative">
+                                            {product.image ? (
+                                                <Image src={product.image} alt={product.nombre} fill className="object-cover" />
+                                            ) : (
+                                                <span className="text-lg font-bold text-neutral-300">{product.nombre.charAt(0).toUpperCase()}</span>
+                                            )}
+                                        </div>
+                                        <div className="ml-3 flex-1 min-w-0">
+                                            <h3 className="font-bold text-sm text-neutral-900 truncate">{product.nombre}</h3>
+                                            <span className="text-[10px] text-neutral-500 block truncate mb-1">{product.descripcion}</span>
+                                            {promo ? (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-neutral-400 line-through text-xs">${product.precioVenta?.toFixed(2)}</span>
+                                                    <span className="text-red-600 font-bold text-sm">${promo.precioPromocional?.toFixed(2)}</span>
+                                                    <span className="bg-red-100 text-red-700 text-[9px] font-bold px-1.5 py-0.5 rounded">{promo.valor}% OFF</span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-primary-700 font-bold text-sm">${product.precioVenta?.toFixed(2)}</span>
+                                            )}
+                                        </div>
+                                        <button 
+                                            className={`h-8 w-8 rounded-full flex items-center justify-center ml-2 flex-shrink-0 transition-colors ${addedProductId === product.id ? 'bg-green-500 text-white' : 'bg-primary-50 text-primary-700 hover:bg-primary-100'}`} 
+                                            onClick={(e) => handleAddToCartClick(product, e)}
+                                        >
+                                            {addedProductId === product.id ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                                        </button>
                                     </div>
-                                    <div className="ml-3 flex-1 min-w-0">
-                                        <h3 className="font-bold text-sm text-neutral-900 truncate">{product.nombre}</h3>
-                                        <span className="text-[10px] text-neutral-500 block truncate mb-1">{product.descripcion}</span>
-                                        <span className="text-primary-700 font-bold text-sm">${product.precioVenta?.toFixed(2)}</span>
-                                    </div>
-                                    <button className="h-8 w-8 rounded-full bg-primary-50 text-primary-700 flex items-center justify-center ml-2 flex-shrink-0 transition-colors hover:bg-primary-100" onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}>
-                                        <Plus className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                     

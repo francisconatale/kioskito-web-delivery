@@ -27,6 +27,7 @@ export interface Promocion {
     precioOriginal?: number;
     precioPromocional?: number;
     productos?: { product: Product, quantity: number }[];
+    productoIds?: number[];
 }
 
 export function useActivePromotions() {
@@ -40,7 +41,7 @@ export function useActivePromotions() {
         const fetchPromotions = async () => {
             try {
                 setLoading(true);
-                const { data } = await apiClient.get<Promocion[]>("/promociones/vigentes", {
+                const { data } = await apiClient.get<Promocion[]>("/productos-delivery/promociones", {
                     params: { negocioId: 1 }
                 });
 

@@ -18,6 +18,7 @@ export function useAppState() {
     }
 
     const handleAddMultipleToCart = (items: { product: Product, quantity: number }[]) => {
+        if (!items) return;
         setCart((prev) => {
             let nextCart = [...prev];
             items.forEach(({ product, quantity }) => {
