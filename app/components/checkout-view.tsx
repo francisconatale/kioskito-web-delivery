@@ -29,7 +29,7 @@ export function CheckoutView({
     error
 }: CheckoutViewProps) {
     const { user: authUser, authState } = useAuth()
-    const { activeAddress } = useAddress()
+    const { activeAddress, setActiveAddress } = useAddress()
     const { originalTotal, promotionalTotal, appliedPromotions, loading: loadingPromos } = usePromotions(cart)
     const { isAbierto, loading: isHorariosLoading } = useHorarios(1)
     
@@ -71,24 +71,19 @@ export function CheckoutView({
     useEffect(() => {
         if (authState === "authenticated") {
             setFormData(prev => {
-                let defaultDir = prev.direccionEntrega;
-                
-                // If currently empty or using the old default, recalculate
-                if (!defaultDir || (addresses.length > 0 && defaultDir === addresses[0].direccion && !addresses[0].esPrincipal)) {
-                    // Priority 1: Context active address
-                    // Priority 2: Auth Context Address (if it exists)
-                    // Priority 3: Backend Principal Address
-                    // Priority 4: First Backend Address
-                    defaultDir = activeAddress
-                        || authUser?.direccion 
-                        || addresses.find(a => a.esPrincipal)?.direccion 
-                        || (addresses.length > 0 ? addresses[0].direccion : "");
-                }
+                // Determine the correct address to use. Global activeAddress takes precedence on load.
+                // If it's not set, fallback to previous state, auth user address, principal address, or first available.
+                let defaultDir = activeAddress 
+                    || prev.direccionEntrega 
+                    || authUser?.direccion 
+                    || addresses.find(a => a.esPrincipal)?.direccion 
+                    || (addresses.length > 0 ? addresses[0].direccion : "");
 
                 // If still empty and no addresses, user needs a new one
                 if (!defaultDir && addresses.length === 0) {
                     setIsUsingNewAddress(true);
-                } else if (defaultDir) {
+                } else if (defaultDir && activeAddress && prev.direccionEntrega !== activeAddress) {
+                    // Only update the "isUsingNewAddress" state if we are explicitly injecting a new active address
                     setIsUsingNewAddress(false);
                 }
 
@@ -258,10 +253,12 @@ export function CheckoutView({
                                             onSelect={(dir) => {
                                                 setFormData({ ...formData, direccionEntrega: dir })
                                                 setIsUsingNewAddress(false)
+                                                setActiveAddress(dir)
                                             }}
                                             onUseNew={() => {
                                                 setIsUsingNewAddress(true)
                                                 setFormData({ ...formData, direccionEntrega: "" })
+                                                setActiveAddress(undefined)
                                             }}
                                         />
                                         
