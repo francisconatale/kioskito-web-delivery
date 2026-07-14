@@ -60,7 +60,6 @@ export function ProductList({
                                         <div className="flex items-center gap-2">
                                             <span className="text-neutral-400 line-through text-xs">${product.precioVenta?.toFixed(2)}</span>
                                             <span className="text-red-600 font-bold text-sm">${promo.precioPromocional?.toFixed(2)}</span>
-                                            <span className="bg-red-100 text-red-700 text-[9px] font-bold px-1.5 py-0.5 rounded">{promo.valor}% OFF</span>
                                         </div>
                                     ) : (
                                         <span className="text-primary-700 font-bold text-sm">${product.precioVenta?.toFixed(2)}</span>

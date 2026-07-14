@@ -1,4 +1,6 @@
 "use client"
+import { NEGOCIO_ID } from '@/lib/config';
+
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, Plus, Edit2, Trash2, Check, X, Sparkles } from 'lucide-react';
@@ -18,7 +20,7 @@ export default function CategoriasPage() {
   const fetchCategorias = async () => {
     try {
       setLoading(true);
-      const { data } = await apiClient.get('/categorias-delivery', { params: { negocioId: 1 } });
+      const { data } = await apiClient.get('/categorias-delivery', { params: { negocioId: NEGOCIO_ID } });
       setCategorias(Array.isArray(data) ? data : (data?.content || (data as any)?.data || []));
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -32,7 +34,7 @@ export default function CategoriasPage() {
     try {
       await apiClient.post('/categorias-delivery', {
         nombre: newCatName.trim(),
-        negocioId: 1
+        negocioId: NEGOCIO_ID
       });
       setNewCatName("");
       setIsCreating(false);
@@ -61,7 +63,7 @@ export default function CategoriasPage() {
         if (!categorias.some(c => (c.nombre || c.name)?.toLowerCase() === name.toLowerCase())) {
           await apiClient.post('/categorias-delivery', {
             nombre: name,
-            negocioId: 1
+            negocioId: NEGOCIO_ID
           });
         }
       }

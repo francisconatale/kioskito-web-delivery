@@ -1,4 +1,6 @@
-"use client";
+"use client"
+import { NEGOCIO_ID } from '@/lib/config';
+;
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -25,7 +27,7 @@ export default function NuevaCategoriaPage() {
         nombre: nombre.trim(),
         descripcion: descripcion.trim(),
         activa: visible,
-        negocioId: 1
+        negocioId: NEGOCIO_ID
       });
       router.push('/dashboard/categorias');
     } catch (error) {

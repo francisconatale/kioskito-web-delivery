@@ -1,3 +1,4 @@
+import { NEGOCIO_ID } from '@/lib/config';
 import { useState } from "react";
 import { apiClient } from "@/lib/api-client";
 import { CartItem } from "@/lib/data";
@@ -20,7 +21,7 @@ export function useCheckout() {
         setError(null);
         try {
             const payload = {
-                negocioId: 1, // Default para el multi-tenant
+                negocioId: NEGOCIO_ID, // Default para el multi-tenant
                 nombreCliente: formData.nombreCliente,
                 dniCliente: formData.dniCliente,
                 telefonoContacto: formData.telefonoContacto,

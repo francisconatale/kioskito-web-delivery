@@ -1,4 +1,6 @@
 "use client"
+import { NEGOCIO_ID } from '@/lib/config';
+
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, Search, Edit2, X, Save, Plus, Trash2 } from 'lucide-react';
@@ -45,8 +47,8 @@ export default function ProductosDeliveryPage() {
     try {
       setLoading(true);
       const [prodRes, catRes] = await Promise.all([
-        apiClient.get('/productos-delivery', { params: { negocioId: 1 } }), // Trae solo los de delivery
-        apiClient.get('/categorias-delivery', { params: { negocioId: 1 } })
+        apiClient.get('/productos-delivery', { params: { negocioId: NEGOCIO_ID } }), // Trae solo los de delivery
+        apiClient.get('/categorias-delivery', { params: { negocioId: NEGOCIO_ID } })
       ]);
       const pData = prodRes.data;
       const cData = catRes.data;
@@ -65,7 +67,7 @@ export default function ProductosDeliveryPage() {
     setSearch(val);
     if (val.length > 2) {
       try {
-        const { data } = await apiClient.get('/productos-delivery', { params: { search: val, negocioId: 1 } });
+        const { data } = await apiClient.get('/productos-delivery', { params: { search: val, negocioId: NEGOCIO_ID } });
         setProductos(Array.isArray(data) ? data : (data?.content || (data as any)?.data || []));
       } catch (err) {}
     } else if (val.length === 0) {
@@ -85,7 +87,7 @@ export default function ProductosDeliveryPage() {
     try {
       setPosLoading(true);
       const [prodRes, catRes] = await Promise.all([
-        apiClient.get('/productos', { params: { size: 20, page: 0, negocioId: 1 } }),
+        apiClient.get('/productos', { params: { size: 20, page: 0, negocioId: NEGOCIO_ID } }),
         apiClient.get('/categoria')
       ]);
       const pData = prodRes.data;
@@ -102,7 +104,7 @@ export default function ProductosDeliveryPage() {
   const fetchPosProductsFiltered = async (searchStr: string, categoryId: string, page = 0, append = false) => {
     try {
       if (!append) setPosLoading(true);
-      const params: any = { negocioId: 1, size: 20, page: page };
+      const params: any = { negocioId: NEGOCIO_ID, size: 20, page: page };
       if (categoryId) params.categoria = categoryId;
       if (searchStr.length > 2) params.q = searchStr;
 

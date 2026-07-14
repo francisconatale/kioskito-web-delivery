@@ -142,7 +142,7 @@ export function CheckoutView({
                 >
                     <ArrowLeft className="w-5 h-5" />
                 </button>
-                <h1 className="font-semibold text-sm tracking-widest uppercase text-muted-foreground">Checkout Seguro</h1>
+                <h1 className="font-semibold text-sm tracking-widest uppercase text-muted-foreground">Checkout</h1>
             </header>
 
             <div className="max-w-2xl mx-auto p-4 lg:py-12 space-y-6">
@@ -348,21 +348,27 @@ export function CheckoutView({
                     
                     {step === 3 && (
                         <div className="p-6 space-y-4 animate-in slide-in-from-top-2">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">Método de Pago *</label>
-                                <Select
-                                    value={formData.metodoPago}
-                                    onValueChange={(value) => setFormData({ ...formData, metodoPago: value })}
-                                >
-                                    <SelectTrigger className="flex h-12 w-full rounded-xl border border-border/50 bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">
-                                        <SelectValue placeholder="Seleccioná un método de pago" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="EFECTIVO">Efectivo</SelectItem>
-                                        <SelectItem value="TRANSFERENCIA">Transferencia</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                            {!isAbierto && !isHorariosLoading ? (
+                                <div className="p-4 bg-red-50 text-red-600 rounded-xl text-[13px] font-semibold text-center my-2 border border-red-100">
+                                    El delivery se encuentra cerrado en este momento.
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">Método de Pago *</label>
+                                    <Select
+                                        value={formData.metodoPago}
+                                        onValueChange={(value) => setFormData({ ...formData, metodoPago: value })}
+                                    >
+                                        <SelectTrigger className="flex h-12 w-full rounded-xl border border-border/50 bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">
+                                            <SelectValue placeholder="Seleccioná un método de pago" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="EFECTIVO">Efectivo</SelectItem>
+                                            <SelectItem value="TRANSFERENCIA">Transferencia</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            )}
 
                             {error && (
                                 <div className="p-4 bg-destructive/5 text-destructive rounded-xl text-[10px] font-semibold uppercase tracking-wider border border-destructive/20 text-center animate-shake mt-4">
@@ -370,26 +376,22 @@ export function CheckoutView({
                                 </div>
                             )}
 
-                            {!isAbierto && !isHorariosLoading && (
-                                <div className="p-4 bg-red-50 text-red-600 rounded-xl text-[12px] font-semibold text-center mt-4">
-                                    El delivery se encuentra cerrado en este momento.
-                                </div>
+                            {isAbierto && (
+                                <Button 
+                                    className="w-full h-14 mt-6 rounded-xl font-bold text-lg shadow-xl shadow-primary/20 active:shadow-none hover:scale-[1.01] transition-transform"
+                                    onClick={() => onConfirm(formData)}
+                                    disabled={!isFormValid || isSubmitting || loadingPromos}
+                                >
+                                    {isSubmitting || loadingPromos ? (
+                                        <div className="flex items-center gap-3">
+                                            <Loader2 className="h-5 w-5 animate-spin" />
+                                            {loadingPromos ? "Calculando promociones..." : "Procesando pedido..."}
+                                        </div>
+                                    ) : (
+                                        `Confirmar pedido - $${promotionalTotal.toFixed(2)}`
+                                    )}
+                                </Button>
                             )}
-
-                            <Button 
-                                className="w-full h-14 mt-6 rounded-xl font-bold text-lg shadow-xl shadow-primary/20 active:shadow-none hover:scale-[1.01] transition-transform"
-                                onClick={() => onConfirm(formData)}
-                                disabled={!isFormValid || isSubmitting || loadingPromos || !isAbierto}
-                            >
-                                {isSubmitting || loadingPromos ? (
-                                    <div className="flex items-center gap-3">
-                                        <Loader2 className="h-5 w-5 animate-spin" />
-                                        {loadingPromos ? "Calculando promociones..." : "Procesando pedido..."}
-                                    </div>
-                                ) : (
-                                    `Confirmar pedido - $${promotionalTotal.toFixed(2)}`
-                                )}
-                            </Button>
                         </div>
                     )}
                 </div>

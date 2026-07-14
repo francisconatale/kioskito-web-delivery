@@ -1,3 +1,4 @@
+import { NEGOCIO_ID } from '@/lib/config';
 import { useState, useEffect } from "react";
 import { apiClient } from "@/lib/api-client";
 import { Product } from "@/lib/data";
@@ -42,7 +43,7 @@ export function useActivePromotions() {
             try {
                 setLoading(true);
                 const { data } = await apiClient.get<Promocion[]>("/productos-delivery/promociones", {
-                    params: { negocioId: 1 }
+                    params: { negocioId: NEGOCIO_ID }
                 });
 
                 if (!data) {
@@ -51,7 +52,21 @@ export function useActivePromotions() {
                 }
 
                 // Backend now provides enriched data (precioOriginal, precioPromocional, esEstimado, productos)
-                if (isMounted) setPromotions(data);
+                const enrichedPromotions = data.map(promo => {
+                    let calculatedPrice = promo.precioPromocional;
+                    if (promo.precioOriginal !== undefined) {
+                        if (promo.tipo === 'DESCUENTO_PORCENTAJE') {
+                            calculatedPrice = promo.precioOriginal * (1 - promo.valor / 100);
+                        } else if (promo.tipo === 'DESCUENTO_FIJO') {
+                            calculatedPrice = Math.max(0, promo.precioOriginal - promo.valor);
+                        } else if (promo.tipo === 'PRECIO_FIJO') {
+                            calculatedPrice = promo.valor;
+                        }
+                    }
+                    return { ...promo, precioPromocional: calculatedPrice };
+                });
+                
+                if (isMounted) setPromotions(enrichedPromotions);
             } catch (err: any) {
                 console.error("Error fetching active promotions:", err);
                 if (isMounted) setError(err.message || "Error al cargar promociones");

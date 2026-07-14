@@ -1,4 +1,6 @@
 "use client"
+import { NEGOCIO_ID } from '@/lib/config';
+
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, Plus, Save, Trash2 } from 'lucide-react';
@@ -7,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { TimePicker } from '@/components/ui/time-picker';
 
 const DIAS = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO'];
-const NEGOCIO_ID = 1; // MVP default
+
 
 export default function HorariosPage() {
   const [horarios, setHorarios] = useState<Record<string, HorarioDelivery[]>>({});

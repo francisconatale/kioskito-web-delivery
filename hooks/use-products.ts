@@ -1,3 +1,4 @@
+import { NEGOCIO_ID } from '@/lib/config';
 import { useState, useEffect, useCallback, useRef } from "react";
 import { apiClient } from "@/lib/api-client";
 import { Product } from "@/lib/data";
@@ -36,7 +37,7 @@ export function useProducts(options: UseProductsOptions = {}) {
             const isTextSearch = searchQuery.trim() !== "";
 
             const endpoint = "/productos-delivery";
-            const params: any = { page: currentPage, size, negocioId: 1 };
+            const params: any = { page: currentPage, size, negocioId: NEGOCIO_ID };
 
             if (isTextSearch) {
                 params.search = searchQuery;

@@ -140,10 +140,31 @@ export function useHomeTab() {
     };
 
     const getPromoForProduct = (productId: number) => {
-        return promotions.find(promo =>
-            promo.productos?.some((p: any) => p.product?.id === productId) ||
-            promo.productoIds?.includes(productId)
-        );
+        const promo = promotions.find(promo => {
+            const isBundle = (promo.productos && (promo.productos.length > 1 || (promo.productos[0] && promo.productos[0].quantity > 1))) || 
+                             (promo.productoIds && promo.productoIds.length > 1);
+            if (isBundle) return false;
+            return promo.productos?.some((p: any) => p.product?.id === productId) ||
+                   promo.productoIds?.includes(productId);
+        });
+        if (!promo) return undefined;
+        
+        // Find the specific product to calculate its promo price
+        const product = products.find(p => p.id === productId) || 
+                       (selectedPromo?.displayProducts || []).find((p: any) => p.id === productId);
+                       
+        if (!product) return promo;
+
+        let calculatedPrice = promo.precioPromocional;
+        if (promo.tipo === 'DESCUENTO_PORCENTAJE') {
+            calculatedPrice = product.precioVenta * (1 - promo.valor / 100);
+        } else if (promo.tipo === 'DESCUENTO_FIJO') {
+            calculatedPrice = Math.max(0, product.precioVenta - promo.valor);
+        } else if (promo.tipo === 'PRECIO_FIJO') {
+            calculatedPrice = promo.valor;
+        }
+
+        return { ...promo, precioPromocional: calculatedPrice };
     };
 
     const displayAddress = activeAddress !== undefined ? activeAddress : user?.direccion;

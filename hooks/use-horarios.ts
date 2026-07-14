@@ -1,7 +1,8 @@
+import { NEGOCIO_ID } from '@/lib/config';
 import { useState, useEffect } from 'react';
 import { horariosService } from '@/lib/horarios-service';
 
-export function useHorarios(negocioId: number = 1) {
+export function useHorarios(negocioId: number = NEGOCIO_ID) {
   const [isAbierto, setIsAbierto] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
 

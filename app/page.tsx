@@ -1,4 +1,6 @@
 "use client"
+import { NEGOCIO_ID } from '@/lib/config';
+
 
 import { useState } from "react"
 import { useAppState } from "./hooks/use-app-state"
@@ -31,7 +33,7 @@ export default function App() {
   const [showCheckout, setShowCheckout] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const { submitOrder, loading: isSubmitting, error: submitError } = useCheckout()
-  const { isAbierto, loading: isHorariosLoading } = useHorarios(1); // MVP: negocioId 1
+  const { isAbierto, loading: isHorariosLoading } = useHorarios(NEGOCIO_ID); // MVP: negocioId 1
 
   if (isResolvingAuth) {
     return (
@@ -96,7 +98,7 @@ export default function App() {
 
       <main className="flex-1 h-screen overflow-y-auto scrollbar-hide relative">
         {!isAbierto && activeTab === "inicio" && (
-          <div className="absolute inset-x-0 top-0 bg-red-500/90 text-white p-3 text-center text-sm font-medium shadow-sm z-50 backdrop-blur-sm">
+          <div className="sticky top-0 w-full bg-red-500/90 text-white p-3 text-center text-sm font-medium shadow-sm z-50 backdrop-blur-sm">
             Actualmente nos encontramos cerrados. Podés armar tu carrito y hacer tu pedido más tarde.
           </div>
         )}
@@ -105,10 +107,7 @@ export default function App() {
                 onAddToCart={handleAddToCart} 
                 onAddMultipleToCart={handleAddMultipleToCart} 
                 cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
-                onCheckout={() => {
-                  if (isAbierto) setShowCheckout(true);
-                  else alert("El delivery se encuentra cerrado en este momento");
-                }}
+                onCheckout={() => setShowCheckout(true)}
             />
         )}
         {activeTab === "pedidos" && <OrdersTab />}

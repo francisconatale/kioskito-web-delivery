@@ -1,3 +1,4 @@
+import { NEGOCIO_ID } from '@/lib/config';
 import { useState, useEffect } from "react";
 import { apiClient } from "@/lib/api-client";
 
@@ -16,7 +17,7 @@ export function useCategories() {
             try {
                 setLoading(true);
                 const { data } = await apiClient.get<any>("/categorias-delivery", {
-                    params: { negocioId: 1 }
+                    params: { negocioId: NEGOCIO_ID }
                 });
                 
                 const items = Array.isArray(data) ? data : (data?.data || data?.content || []);

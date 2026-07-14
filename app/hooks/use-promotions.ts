@@ -1,3 +1,4 @@
+import { NEGOCIO_ID } from '@/lib/config';
 import { useState, useEffect } from "react"
 import { CartItem } from "@/lib/data"
 import { apiClient } from "@/lib/api-client"
@@ -51,7 +52,7 @@ export function usePromotions(cart: CartItem[]) {
                 }))
 
                 const { data } = await apiClient.post<any>("/promociones/simular", { items }, {
-                    params: { negocioId: 1 }
+                    params: { negocioId: NEGOCIO_ID }
                 })
 
                 if (data) {

@@ -1,4 +1,6 @@
 "use client"
+import { NEGOCIO_ID } from '@/lib/config';
+
 import React, { useState, useEffect } from 'react';
 import { adminMenu, adminStats } from './data';
 import { LayoutDashboard, Package, ListTree, Clock, Settings, ArrowUpRight, TrendingUp, Menu, ChevronLeft } from 'lucide-react';
@@ -9,13 +11,13 @@ import { apiClient } from '@/lib/api-client';
 const iconMap: Record<string, any> = { LayoutDashboard, Package, ListTree, Clock, Settings };
 
 export default function DashboardHome() {
-  const { isAbierto, loading: horariosLoading } = useHorarios(1);
+  const { isAbierto, loading: horariosLoading } = useHorarios(NEGOCIO_ID);
   const [activeProducts, setActiveProducts] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const { data } = await apiClient.get('/productos-delivery', { params: { negocioId: 1, size: 1 } });
+        const { data } = await apiClient.get('/productos-delivery', { params: { negocioId: NEGOCIO_ID, size: 1 } });
         const total = (data as any)?.totalElements ?? (Array.isArray(data) ? data.length : 0);
         setActiveProducts(total);
       } catch (err) {

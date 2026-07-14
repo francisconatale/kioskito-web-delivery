@@ -19,7 +19,11 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart, cartCount = 0, onChe
 
     const handleAddToCartClick = (product: any, e?: React.MouseEvent) => {
         if (e) e.stopPropagation();
-        onAddToCart(product);
+        const promo = actions.getPromoForProduct(product.id);
+        const productToAdd = promo && promo.precioPromocional !== undefined
+            ? { ...product, precioVenta: promo.precioPromocional }
+            : product;
+        onAddToCart(productToAdd);
         actions.setAddedProductId(product.id);
         setTimeout(() => {
             actions.setAddedProductId(null);
