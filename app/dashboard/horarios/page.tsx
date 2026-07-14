@@ -93,7 +93,7 @@ export default function HorariosPage() {
           <button 
             onClick={handleSave} 
             disabled={saving || loading}
-            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
             {saving ? 'Guardando...' : 'Guardar Cambios'}
@@ -151,7 +151,7 @@ export default function HorariosPage() {
                     ))}
                     <button 
                       onClick={() => handleAddWindow(dia)}
-                      className="flex items-center gap-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-700 mt-2 px-1 transition-colors"
+                      className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 mt-2 px-1 transition-colors"
                     >
                       <Plus className="w-4 h-4" /> Agregar intervalo
                     </button>

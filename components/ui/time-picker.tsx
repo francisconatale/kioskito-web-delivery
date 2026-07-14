@@ -31,7 +31,7 @@ export function TimePicker({ value, onChange, className }: TimePickerProps) {
       <PopoverTrigger asChild>
         <button
           className={cn(
-            "flex items-center justify-center gap-2 w-full px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+            "flex items-center justify-center gap-2 w-full px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 border border-transparent",
             className
           )}
         >
@@ -51,7 +51,7 @@ export function TimePicker({ value, onChange, className }: TimePickerProps) {
                     onClick={() => handleHourSelect(h)}
                     className={cn(
                       "w-full px-2 py-1.5 text-sm rounded-md transition-colors",
-                      hours === h ? "bg-primary text-primary-foreground font-medium" : "hover:bg-accent hover:text-accent-foreground"
+                      hours === h ? "bg-blue-600 text-white font-medium" : "hover:bg-neutral-100"
                     )}
                   >
                     {h}
@@ -70,7 +70,7 @@ export function TimePicker({ value, onChange, className }: TimePickerProps) {
                     onClick={() => handleMinuteSelect(m)}
                     className={cn(
                       "w-full px-2 py-1.5 text-sm rounded-md transition-colors",
-                      minutes === m ? "bg-primary text-primary-foreground font-medium" : "hover:bg-accent hover:text-accent-foreground"
+                      minutes === m ? "bg-blue-600 text-white font-medium" : "hover:bg-neutral-100"
                     )}
                   >
                     {m}
