@@ -10,6 +10,13 @@ import { useAddress } from "@/hooks/use-address"
 import { addressService, Address } from "@/lib/address-service"
 import { AddressSelection } from "./address-selection"
 import { useHorarios } from "@/hooks/use-horarios"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 interface CheckoutViewProps {
     cart: CartItem[]
@@ -343,19 +350,18 @@ export function CheckoutView({
                         <div className="p-6 space-y-4 animate-in slide-in-from-top-2">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">Método de Pago *</label>
-                                <select 
-                                    value={formData.metodoPago} 
-                                    onChange={(e) => setFormData({...formData, metodoPago: e.target.value})} 
-                                    className="flex h-12 w-full rounded-xl border border-border/50 bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2"
+                                <Select
+                                    value={formData.metodoPago}
+                                    onValueChange={(value) => setFormData({ ...formData, metodoPago: value })}
                                 >
-                                    <option value="" disabled>Seleccioná un método de pago</option>
-                                    <option value="EFECTIVO">Efectivo</option>
-                                    <option value="DEBITO">Débito</option>
-                                    <option value="CREDITO">Crédito</option>
-                                    <option value="TRANSFERENCIA">Transferencia</option>
-                                    <option value="FIADO">Fiado</option>
-                                    <option value="MIXTO">Mixto</option>
-                                </select>
+                                    <SelectTrigger className="flex h-12 w-full rounded-xl border border-border/50 bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">
+                                        <SelectValue placeholder="Seleccioná un método de pago" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="EFECTIVO">Efectivo</SelectItem>
+                                        <SelectItem value="TRANSFERENCIA">Transferencia</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             {error && (

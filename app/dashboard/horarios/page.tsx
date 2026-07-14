@@ -1,8 +1,10 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, Plus, X, Save } from 'lucide-react';
+import { ChevronLeft, Plus, Save, Trash2 } from 'lucide-react';
 import { horariosService, HorarioDelivery } from '@/lib/horarios-service';
+import { Switch } from '@/components/ui/switch';
+import { TimePicker } from '@/components/ui/time-picker';
 
 const DIAS = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO'];
 const NEGOCIO_ID = 1; // MVP default
@@ -36,7 +38,7 @@ export default function HorariosPage() {
       ...prev,
       [dia]: [
         ...(prev[dia] || []),
-        { negocioId: NEGOCIO_ID, diaSemana: dia, horaApertura: '09:00', horaCierre: '18:00', activo: true }
+        { negocioId: NEGOCIO_ID, diaSemana: dia, horaApertura: '09:00:00', horaCierre: '18:00:00', activo: true }
       ]
     }));
   };
@@ -51,15 +53,18 @@ export default function HorariosPage() {
   const handleChangeTime = (dia: string, index: number, field: 'horaApertura' | 'horaCierre', value: string) => {
     setHorarios(prev => {
       const newDia = [...prev[dia]];
-      // Add :00 seconds if the user input only has HH:mm
       const formattedValue = value.length === 5 ? `${value}:00` : value;
       newDia[index] = { ...newDia[index], [field]: formattedValue };
       return { ...prev, [dia]: newDia };
     });
   };
 
-  const formatTimeInput = (timeString: string) => {
-    return timeString ? timeString.substring(0, 5) : '';
+  const toggleDay = (dia: string, isOpen: boolean) => {
+    if (isOpen) {
+      handleAddWindow(dia);
+    } else {
+      setHorarios(prev => ({ ...prev, [dia]: [] }));
+    }
   };
 
   const handleSave = async () => {
@@ -79,7 +84,7 @@ export default function HorariosPage() {
   return (
     <div className="w-full bg-neutral-50 min-h-screen font-sans text-sm pb-24">
       <header className="bg-white px-4 md:px-8 py-4 border-b border-neutral-200 sticky top-0 z-10">
-        <div className="flex items-center gap-4 max-w-5xl mx-auto">
+        <div className="flex items-center gap-4 max-w-3xl mx-auto">
           <Link href="/dashboard" className="p-2 -ml-2 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors">
             <ChevronLeft className="w-5 h-5" />
           </Link>
@@ -96,62 +101,65 @@ export default function HorariosPage() {
         </div>
       </header>
 
-      <main className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
+      <main className="p-4 md:p-8 max-w-3xl mx-auto space-y-4">
         {loading ? (
           <div className="text-center py-12 text-neutral-500">Cargando horarios...</div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
-            <div className="p-6 border-b border-neutral-100">
-              <h2 className="text-lg font-semibold text-neutral-900">Configuración Semanal</h2>
-              <p className="text-neutral-500 mt-1">Define en qué horarios tu negocio acepta pedidos de delivery.</p>
-            </div>
-            <div className="divide-y divide-neutral-100">
-              {DIAS.map(dia => (
-                <div key={dia} className="p-6 flex flex-col md:flex-row md:items-start gap-4">
-                  <div className="w-32 font-medium text-neutral-700 capitalize pt-2">
-                    {dia.toLowerCase()}
+          DIAS.map(dia => {
+            const dayHorarios = horarios[dia] || [];
+            const isOpen = dayHorarios.length > 0;
+            return (
+              <div key={dia} className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden group">
+                <div className="px-5 py-4 flex items-center justify-between bg-white border-b border-neutral-100">
+                  <div className="flex items-center gap-3">
+                    <Switch 
+                      checked={isOpen} 
+                      onCheckedChange={(checked) => toggleDay(dia, checked)} 
+                    />
+                    <span className={`font-semibold capitalize ${isOpen ? 'text-neutral-900' : 'text-neutral-400'}`}>
+                      {dia.toLowerCase()}
+                    </span>
                   </div>
-                  <div className="flex-1 space-y-3">
-                    {horarios[dia]?.length === 0 ? (
-                      <div className="text-neutral-400 py-2 italic">Cerrado este día</div>
-                    ) : (
-                      horarios[dia]?.map((ventana, i) => (
-                        <div key={i} className="flex items-center gap-3">
-                          <input 
-                            type="time" 
-                            className="border border-neutral-300 rounded-lg px-3 py-2 text-neutral-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                            value={formatTimeInput(ventana.horaApertura)}
-                            onChange={(e) => handleChangeTime(dia, i, 'horaApertura', e.target.value)}
+                  {!isOpen && <span className="text-sm text-neutral-400 italic">Cerrado</span>}
+                </div>
+                
+                {isOpen && (
+                  <div className="bg-neutral-50/50 px-5 py-4 space-y-3">
+                    {dayHorarios.map((ventana, i) => (
+                      <div key={i} className="flex items-center gap-4">
+                        <div className="flex items-center bg-white border border-neutral-200 rounded-lg shadow-sm flex-1 max-w-sm">
+                          <TimePicker 
+                            value={ventana.horaApertura} 
+                            onChange={(v) => handleChangeTime(dia, i, 'horaApertura', v)}
+                            className="flex-1"
                           />
-                          <span className="text-neutral-400">a</span>
-                          <input 
-                            type="time" 
-                            className="border border-neutral-300 rounded-lg px-3 py-2 text-neutral-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                            value={formatTimeInput(ventana.horaCierre)}
-                            onChange={(e) => handleChangeTime(dia, i, 'horaCierre', e.target.value)}
+                          <div className="h-6 w-px bg-neutral-200"></div>
+                          <TimePicker 
+                            value={ventana.horaCierre} 
+                            onChange={(v) => handleChangeTime(dia, i, 'horaCierre', v)}
+                            className="flex-1"
                           />
-                          <button 
-                            onClick={() => handleRemoveWindow(dia, i)}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors ml-2"
-                            title="Eliminar horario"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
                         </div>
-                      ))
-                    )}
+                        <button 
+                          onClick={() => handleRemoveWindow(dia, i)}
+                          className="text-neutral-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-50 rounded-full"
+                          title="Eliminar horario"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
                     <button 
                       onClick={() => handleAddWindow(dia)}
-                      className="flex items-center gap-1 text-emerald-600 font-medium hover:text-emerald-700 text-sm mt-2"
+                      className="flex items-center gap-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-700 mt-2 px-1 transition-colors"
                     >
-                      <Plus className="w-4 h-4" />
-                      Agregar horario
+                      <Plus className="w-4 h-4" /> Agregar intervalo
                     </button>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                )}
+              </div>
+            );
+          })
         )}
       </main>
     </div>
