@@ -6,8 +6,10 @@ import { CartItem } from "@/lib/data"
 import { usePromotions } from "../hooks/use-promotions"
 import { CheckoutFormData } from "@/hooks/use-checkout"
 import { useAuth } from "@/hooks/use-auth"
+import { useAddress } from "@/hooks/use-address"
 import { addressService, Address } from "@/lib/address-service"
 import { AddressSelection } from "./address-selection"
+import { useHorarios } from "@/hooks/use-horarios"
 
 interface CheckoutViewProps {
     cart: CartItem[]
@@ -27,7 +29,9 @@ export function CheckoutView({
     error
 }: CheckoutViewProps) {
     const { user: authUser, authState } = useAuth()
+    const { activeAddress } = useAddress()
     const { originalTotal, promotionalTotal, appliedPromotions, loading: loadingPromos } = usePromotions(cart)
+    const { isAbierto, loading: isHorariosLoading } = useHorarios(1)
     
     const [step, setStep] = useState(1)
     
@@ -35,7 +39,7 @@ export function CheckoutView({
         nombreCliente: authUser?.nombre || "",
         dniCliente: authUser?.dni || "",
         telefonoContacto: authUser?.telefono || "",
-        direccionEntrega: authUser?.direccion || "",
+        direccionEntrega: activeAddress || authUser?.direccion || "",
         observaciones: "",
         metodoPago: ""
     })
@@ -51,12 +55,6 @@ export function CheckoutView({
                 try {
                     const data = await addressService.getAddresses()
                     setAddresses(data)
-                    // Si tiene direcciones, seleccionar la primera por defecto si no hay nada en formData
-                    if (data.length > 0 && !formData.direccionEntrega) {
-                        setFormData(prev => ({ ...prev, direccionEntrega: data[0].direccion }))
-                    } else if (data.length === 0) {
-                        setIsUsingNewAddress(true)
-                    }
                 } catch (error) {
                     console.error("Error fetching addresses:", error)
                 } finally {
@@ -69,17 +67,41 @@ export function CheckoutView({
         fetchAddresses()
     }, [authState])
 
+    // Resolve which address should be the default, reacting to authUser and addresses changes
     useEffect(() => {
-        if (authState === "authenticated" && authUser) {
-            setFormData(prev => ({
-                ...prev,
-                nombreCliente: prev.nombreCliente || authUser.nombre || "",
-                dniCliente: prev.dniCliente || authUser.dni || "",
-                telefonoContacto: prev.telefonoContacto || authUser.telefono || "",
-                direccionEntrega: prev.direccionEntrega || authUser.direccion || "",
-            }))
+        if (authState === "authenticated") {
+            setFormData(prev => {
+                let defaultDir = prev.direccionEntrega;
+                
+                // If currently empty or using the old default, recalculate
+                if (!defaultDir || (addresses.length > 0 && defaultDir === addresses[0].direccion && !addresses[0].esPrincipal)) {
+                    // Priority 1: Context active address
+                    // Priority 2: Auth Context Address (if it exists)
+                    // Priority 3: Backend Principal Address
+                    // Priority 4: First Backend Address
+                    defaultDir = activeAddress
+                        || authUser?.direccion 
+                        || addresses.find(a => a.esPrincipal)?.direccion 
+                        || (addresses.length > 0 ? addresses[0].direccion : "");
+                }
+
+                // If still empty and no addresses, user needs a new one
+                if (!defaultDir && addresses.length === 0) {
+                    setIsUsingNewAddress(true);
+                } else if (defaultDir) {
+                    setIsUsingNewAddress(false);
+                }
+
+                return {
+                    ...prev,
+                    nombreCliente: prev.nombreCliente || authUser?.nombre || "",
+                    dniCliente: prev.dniCliente || authUser?.dni || "",
+                    telefonoContacto: prev.telefonoContacto || authUser?.telefono || "",
+                    direccionEntrega: defaultDir,
+                };
+            })
         }
-    }, [authUser, authState])
+    }, [authUser, authState, addresses, activeAddress])
 
     const isStep2Valid = formData.nombreCliente.trim() !== "" && formData.direccionEntrega.trim() !== ""
     const isFormValid = isStep2Valid && formData.metodoPago !== ""
@@ -345,10 +367,16 @@ export function CheckoutView({
                                 </div>
                             )}
 
+                            {!isAbierto && !isHorariosLoading && (
+                                <div className="p-4 bg-red-50 text-red-600 rounded-xl text-[12px] font-semibold text-center mt-4">
+                                    El delivery se encuentra cerrado en este momento.
+                                </div>
+                            )}
+
                             <Button 
                                 className="w-full h-14 mt-6 rounded-xl font-bold text-lg shadow-xl shadow-primary/20 active:shadow-none hover:scale-[1.01] transition-transform"
                                 onClick={() => onConfirm(formData)}
-                                disabled={!isFormValid || isSubmitting || loadingPromos}
+                                disabled={!isFormValid || isSubmitting || loadingPromos || !isAbierto}
                             >
                                 {isSubmitting || loadingPromos ? (
                                     <div className="flex items-center gap-3">

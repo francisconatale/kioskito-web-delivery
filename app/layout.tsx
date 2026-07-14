@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { AuthProvider } from '@/hooks/use-auth'
+import { AddressProvider } from '@/hooks/use-address'
 import { Toaster } from 'sonner'
 import './globals.css'
 
@@ -19,15 +20,17 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <body className="font-sans antialiased selection:bg-primary/20">
         <AuthProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem={false}
-            disableTransitionOnChange
-          >
-            {children}
-            <Toaster position="top-right" richColors />
-          </ThemeProvider>
+          <AddressProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="light"
+              enableSystem={false}
+              disableTransitionOnChange
+            >
+              {children}
+              <Toaster position="top-right" richColors />
+            </ThemeProvider>
+          </AddressProvider>
         </AuthProvider>
       </body>
     </html>

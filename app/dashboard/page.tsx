@@ -1,12 +1,30 @@
 "use client"
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { adminMenu, adminStats } from './data';
 import { LayoutDashboard, Package, ListTree, Clock, Settings, ArrowUpRight, TrendingUp, Menu, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useHorarios } from '@/hooks/use-horarios';
+import { apiClient } from '@/lib/api-client';
 
 const iconMap: Record<string, any> = { LayoutDashboard, Package, ListTree, Clock, Settings };
 
 export default function DashboardHome() {
+  const { isAbierto, loading: horariosLoading } = useHorarios(1);
+  const [activeProducts, setActiveProducts] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const { data } = await apiClient.get('/productos-delivery', { params: { negocioId: 1, size: 1 } });
+        const total = (data as any)?.totalElements ?? (Array.isArray(data) ? data.length : 0);
+        setActiveProducts(total);
+      } catch (err) {
+        console.error("Error fetching active products:", err);
+      }
+    };
+    fetchStats();
+  }, []);
+
   return (
     <div className="w-full bg-neutral-100 min-h-screen flex flex-col font-sans text-sm">
       
@@ -40,15 +58,18 @@ export default function DashboardHome() {
             <div className="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-neutral-200">
               <p className="text-neutral-500 font-medium mb-1 text-xs md:text-sm">Estado Kiosco</p>
               <div className="flex items-end gap-3">
-                <span className="text-xl md:text-2xl font-bold text-success-600 flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-success-500 animate-pulse"></span> {adminStats.status}
+                <span className={`text-xl md:text-2xl font-bold flex items-center gap-2 ${isAbierto ? 'text-success-600' : 'text-red-600'}`}>
+                  <span className={`w-3 h-3 rounded-full ${isAbierto ? 'bg-success-500 animate-pulse' : 'bg-red-500'}`}></span>
+                  {horariosLoading ? "..." : (isAbierto ? "Abierto" : "Cerrado")}
                 </span>
               </div>
             </div>
             <div className="bg-primary-700 p-5 md:p-6 rounded-2xl shadow-sm text-white sm:col-span-2 md:col-span-1">
               <p className="text-primary-200 font-medium mb-1 text-xs md:text-sm">Catálogo Activo</p>
               <div className="flex items-end gap-3">
-                <span className="text-2xl md:text-3xl font-black">{adminStats.activeProducts}</span>
+                <span className="text-2xl md:text-3xl font-black">
+                  {activeProducts !== null ? activeProducts : '...'}
+                </span>
                 <span className="text-primary-200 font-medium text-xs md:text-sm">productos</span>
               </div>
             </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, Plus, MapPin, X, Loader2 } from "lucide-react"
+import { ArrowLeft, Plus, MapPin, X, Loader2, Home } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,6 +20,7 @@ export function AddressesTab({ onBack }: AddressesTabProps) {
     const [isAdding, setIsAdding] = useState(false)
     const [newAddress, setNewAddress] = useState("")
     const [removingId, setRemovingId] = useState<number | null>(null)
+    const [settingMainId, setSettingMainId] = useState<number | null>(null)
 
     useEffect(() => {
         const fetchAddresses = async () => {
@@ -80,6 +81,27 @@ export function AddressesTab({ onBack }: AddressesTabProps) {
         }
     }
 
+    const handleSetMainAddress = async (id: number) => {
+        setSettingMainId(id)
+        try {
+            await addressService.setMainAddress(id)
+            setAddresses(prev => prev.map(a => ({
+                ...a,
+                esPrincipal: a.id === id
+            })))
+            toast({ title: "Dirección principal", description: "La dirección fue establecida como principal." })
+        } catch (error) {
+            console.error("Error setting main address:", error)
+            toast({
+                title: "Error",
+                description: "Hubo un problema al establecer la dirección principal.",
+                variant: "destructive"
+            })
+        } finally {
+            setSettingMainId(null)
+        }
+    }
+
     return (
         <div className="pb-32 max-w-xl mx-auto w-full animate-in fade-in slide-in-from-right-4 duration-300">
             {/* Header */}
@@ -111,22 +133,37 @@ export function AddressesTab({ onBack }: AddressesTabProps) {
                         ) : (
                             <ul className="space-y-3">
                                 {addresses.map(address => (
-                                    <li key={address.id} className="flex items-center justify-between p-4 rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md transition-shadow">
+                                    <li key={address.id} className={`flex items-center justify-between p-4 rounded-2xl border transition-shadow ${address.esPrincipal ? 'border-primary bg-primary/5 shadow-md' : 'border-border/50 bg-card shadow-sm hover:shadow-md'}`}>
                                         <div className="flex items-center gap-3 overflow-hidden">
-                                            <div className="h-10 w-10 shrink-0 rounded-full bg-primary/10 flex items-center justify-center">
-                                                <MapPin className="h-5 w-5 text-primary" />
+                                            <div className={`h-10 w-10 shrink-0 rounded-full flex items-center justify-center ${address.esPrincipal ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'}`}>
+                                                {address.esPrincipal ? <Home className="h-5 w-5" /> : <MapPin className="h-5 w-5" />}
                                             </div>
                                             <span className="font-medium truncate">{address.direccion}</span>
+                                            {address.esPrincipal && <span className="text-[10px] uppercase font-bold bg-primary/20 text-primary px-2 py-0.5 rounded-full ml-1">Principal</span>}
                                         </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0 ml-2"
-                                            onClick={() => handleRemoveAddress(address.id)}
-                                            disabled={removingId === address.id}
-                                        >
-                                            {removingId === address.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
-                                        </Button>
+                                        <div className="flex items-center gap-1 shrink-0 ml-2">
+                                            {!address.esPrincipal && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                                                    onClick={() => handleSetMainAddress(address.id)}
+                                                    disabled={settingMainId === address.id || removingId === address.id}
+                                                    title="Establecer como principal"
+                                                >
+                                                    {settingMainId === address.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Home className="h-4 w-4" />}
+                                                </Button>
+                                            )}
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                onClick={() => handleRemoveAddress(address.id)}
+                                                disabled={removingId === address.id || settingMainId === address.id}
+                                            >
+                                                {removingId === address.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+                                            </Button>
+                                        </div>
                                     </li>
                                 ))}
                             </ul>

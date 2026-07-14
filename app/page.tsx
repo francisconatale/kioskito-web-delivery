@@ -9,12 +9,11 @@ import { AccountTab } from "./components/account-tab"
 import { AddressesTab } from "./components/addresses-tab"
 import { BottomNav } from "./components/bottom-nav"
 import { DesktopSidebar } from "./components/desktop-sidebar"
-import { FloatingCart } from "./components/floating-cart"
 import { CheckoutView } from "./components/checkout-view"
 import { useCheckout, CheckoutFormData } from "@/hooks/use-checkout"
 import { useAuth } from "@/hooks/use-auth"
-import { usePromotions } from "./hooks/use-promotions"
 import { SuccessView } from "./components/success-view"
+import { useHorarios } from "@/hooks/use-horarios"
 
 export default function App() {
   const {
@@ -26,13 +25,13 @@ export default function App() {
     handleUpdateQuantity,
     handleCheckout
   } = useAppState()
-  const { promotionalTotal, loading: loadingPromos } = usePromotions(cart)
 
   const { authState, setAsGuest, logout, isResolvingAuth } = useAuth()
 
   const [showCheckout, setShowCheckout] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const { submitOrder, loading: isSubmitting, error: submitError } = useCheckout()
+  const { isAbierto, loading: isHorariosLoading } = useHorarios(1); // MVP: negocioId 1
 
   if (isResolvingAuth) {
     return (
@@ -47,11 +46,6 @@ export default function App() {
 
   if (authState === "login") {
     return <AuthScreen />
-  }
-
-  const isGuest = authState === "guest"
-  const handleLogout = () => {
-    logout()
   }
 
   const handleConfirmOrder = async (formData: CheckoutFormData) => {
@@ -100,13 +94,21 @@ export default function App() {
         onTabChange={setActiveTab}
       />
 
-      <main className="flex-1 h-screen overflow-y-auto scrollbar-hide">
+      <main className="flex-1 h-screen overflow-y-auto scrollbar-hide relative">
+        {!isAbierto && activeTab === "inicio" && (
+          <div className="absolute inset-x-0 top-0 bg-red-500/90 text-white p-3 text-center text-sm font-medium shadow-sm z-50 backdrop-blur-sm">
+            Actualmente nos encontramos cerrados. Podés armar tu carrito y hacer tu pedido más tarde.
+          </div>
+        )}
         {activeTab === "inicio" && (
             <HomeTab 
                 onAddToCart={handleAddToCart} 
                 onAddMultipleToCart={handleAddMultipleToCart} 
                 cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
-                onCheckout={() => setShowCheckout(true)}
+                onCheckout={() => {
+                  if (isAbierto) setShowCheckout(true);
+                  else alert("El delivery se encuentra cerrado en este momento");
+                }}
             />
         )}
         {activeTab === "pedidos" && <OrdersTab />}

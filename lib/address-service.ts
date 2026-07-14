@@ -3,6 +3,7 @@ import { apiClient } from "./api-client";
 export interface Address {
     id: number;
     direccion: string;
+    esPrincipal?: boolean;
 }
 
 export const addressService = {
@@ -16,5 +17,8 @@ export const addressService = {
     },
     async removeAddress(direccionId: number): Promise<void> {
         await apiClient.delete(`/clientes/me/direcciones/${direccionId}`);
+    },
+    async setMainAddress(direccionId: number): Promise<void> {
+        await apiClient.put(`/clientes/me/direcciones/${direccionId}/principal`);
     }
 };
