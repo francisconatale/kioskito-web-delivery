@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Bell, BellOff, User, ShoppingBag, MapPin, Settings, ChevronRight, ChevronLeft, LogOut, LogIn, UserPlus, Loader2 } from "lucide-react"
+import { Bell, BellOff, User, ShoppingBag, MapPin, Settings, ChevronRight, ChevronLeft, LogOut, LogIn, UserPlus, Loader2, LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/use-auth"
 import { useNotifications } from "@/hooks/use-notifications"
@@ -152,6 +152,15 @@ export function AccountTab({ onTabChange }: AccountTabProps) {
                     description="Gestioná tus puntos de entrega"
                     onClick={() => onTabChange("direcciones")}
                 />
+
+                {(userInfo?.rol === 'ADMIN' || userInfo?.rol === 'GERENTE') && (
+                    <MenuItem
+                        icon={<LayoutDashboard className="h-5 w-5" />}
+                        title="Dashboard"
+                        description="Administrá el kiosco"
+                        onClick={() => window.location.href = '/dashboard'}
+                    />
+                )}
 
                 <MenuItem
                     icon={<Settings className="h-5 w-5" />}
