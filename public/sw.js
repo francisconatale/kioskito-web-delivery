@@ -42,6 +42,8 @@ self.addEventListener("notificationclick", (event) => {
   if (data.web === "ECOMMERCE") {
     if (data.target === "ORDERS") url = "/?tab=pedidos"
     else if (data.target === "HOME") url = "/"
+  } else if (data.web === "POS") {
+    url = "/dashboard"
   }
 
   event.waitUntil(
