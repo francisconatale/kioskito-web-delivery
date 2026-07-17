@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { getToken, deleteToken, onMessage } from "firebase/messaging"
 import { messaging } from "@/lib/firebase"
 import { useAuth } from "@/hooks/use-auth"
@@ -118,30 +118,44 @@ export function useNotifications() {
     return unsub
   }, [])
 
+  const restored = useRef(false)
+
   useEffect(() => {
     if (authState === "login") return
     if (!swReady) return
-    if (notificationState === "denied") return
-    if (notificationState === "unsupported") return
+    if (notificationState !== "granted") return
+    if (fcmToken) return
+    if (restored.current) return
+    if (!messaging) return
 
-    const asked = sessionStorage.getItem(ASKED_KEY)
-    if (asked) return
+    restored.current = true
 
-    sessionStorage.setItem(ASKED_KEY, "true")
+    ;(async () => {
+      try {
+        const registration = await navigator.serviceWorker.ready
+        const subscription = await registration.pushManager.getSubscription()
+        if (!subscription) return
 
-    const timer = setTimeout(() => {
-      toast("¿Querés recibir notificaciones?", {
-        description: "Te avisamos cuando tu pedido esté listo o tengamos promociones.",
-        duration: 10000,
-        action: {
-          label: "Activar",
-          onClick: subscribe,
-        },
-      })
-    }, 3000)
+        const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
+        if (!vapidKey) return
 
-    return () => clearTimeout(timer)
-  }, [authState, swReady, notificationState, subscribe])
+        const token = await getToken(messaging, { vapidKey, serviceWorkerRegistration: registration })
+
+        const res = await fetch(SUBSCRIBE_URL, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ token, plataforma: "WEB" }),
+        })
+
+        if (!res.ok) throw new Error("Fallo al restaurar suscripción")
+
+        setFcmToken(token)
+        sessionStorage.setItem(ASKED_KEY, "granted")
+      } catch (err) {
+        console.error("Error restoring subscription:", err)
+      }
+    })()
+  }, [authState, swReady, notificationState, fcmToken])
 
   return {
     notificationState,

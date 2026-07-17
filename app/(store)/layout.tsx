@@ -8,6 +8,7 @@ import { BottomNav } from "@/app/components/bottom-nav"
 import { useAuth } from "@/hooks/use-auth"
 import { AuthScreen } from "@/app/components/auth-screen"
 import { useNotifications } from "@/hooks/use-notifications"
+import { NotificationBanner } from "@/app/components/notification-banner"
 
 const sidebarTabs = [
     { id: "inicio", icon: Home, label: "Inicio", href: "/" },
@@ -29,9 +30,7 @@ function Sidebar() {
                     <div className="absolute bottom-0 left-0 w-full h-px bg-white/10"></div>
                 </div>
                 <div className="relative z-10">
-                    <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-3 border border-white/20 shadow-lg">
-                        <span className="text-white font-display font-bold text-lg">C</span>
-                    </div>
+
                     <h1 className="font-display font-bold text-xl text-white tracking-tight drop-shadow-sm">Caffres</h1>
                     <p className="text-blue-100/80 text-xs font-medium mt-0.5 drop-shadow-sm">Delivery de confianza</p>
                 </div>
@@ -101,6 +100,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
         <div className="min-h-screen bg-background flex w-full">
             <Sidebar />
             <main className="flex-1 h-screen overflow-y-auto scrollbar-hide relative pb-16 lg:pb-0">
+                <NotificationBanner />
                 {children}
             </main>
             <BottomNav />

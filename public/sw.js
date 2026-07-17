@@ -24,7 +24,7 @@ self.addEventListener("push", (event) => {
 
   const options = {
     body,
-    icon: "/icon-light-32x32.png",
+    icon: "/web-app-manifest-192x192.png",
     badge: "/icon-light-32x32.png",
     data,
     vibrate: [200, 100, 200],
