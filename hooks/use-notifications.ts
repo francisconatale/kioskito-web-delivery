@@ -42,41 +42,6 @@ export function useNotifications() {
     }
   }, [authState])
 
-  useEffect(() => {
-    if (!messaging || Notification.permission !== "granted") return
-
-    const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
-    if (!vapidKey) return
-
-    navigator.serviceWorker.ready.then((registration) => {
-      console.log("Service Worker listo para FCM, solicitando token...")
-      getToken(messaging, { vapidKey, serviceWorkerRegistration: registration })
-        .then(async (token) => {
-          if (token) {
-            console.log("FCM Token obtenido:", token)
-            setFcmToken(token)
-            setNotificationState("granted")
-            try {
-              const res = await fetch(SUBSCRIBE_URL, {
-                method: "POST",
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ token, plataforma: "WEB" }),
-              })
-              if (!res.ok) throw new Error("Error en la respuesta del servidor")
-              console.log("Token registrado en el servidor exitosamente")
-            } catch (err) {
-              console.error("Error auto-registrando el token en tu backend:", err)
-            }
-          } else {
-            console.warn("No se pudo obtener el token (el usuario denegó permiso o falló la conexión)")
-          }
-        })
-        .catch((err) => {
-          console.error("Error en getToken (auto):", err)
-        })
-    })
-  }, [messaging, swReady])
-
   const subscribe = useCallback(async () => {
     if (!messaging) return
 
@@ -156,7 +121,6 @@ export function useNotifications() {
   useEffect(() => {
     if (authState === "login") return
     if (!swReady) return
-    if (notificationState === "granted") return
     if (notificationState === "denied") return
     if (notificationState === "unsupported") return
 

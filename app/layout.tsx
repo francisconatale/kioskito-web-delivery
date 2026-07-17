@@ -19,6 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        <meta name="apple-mobile-web-app-title" content="Caffres" />
+      </head>
       <body className="font-sans antialiased selection:bg-primary/20">
         <AuthProvider>
           <AddressProvider>

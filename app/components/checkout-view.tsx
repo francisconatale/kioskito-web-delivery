@@ -145,7 +145,7 @@ export function CheckoutView({
                 <h1 className="font-semibold text-sm tracking-widest uppercase text-muted-foreground">Checkout</h1>
             </header>
 
-            <div className="max-w-2xl mx-auto p-4 lg:py-12 space-y-6">
+            <div className="max-w-2xl mx-auto p-4 lg:p-8 lg:py-12 space-y-6">
                 
                 {/* Step 1: Revisá tu pedido */}
                 <div className={`border ${step === 1 ? 'border-primary shadow-lg shadow-primary/5' : 'border-border/50'} rounded-2xl overflow-hidden transition-all bg-card`}>

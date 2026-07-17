@@ -14,14 +14,14 @@ export function PromoList({ promotions, addingPromoId, onPromoClick }: PromoList
             <div className="flex justify-between items-end mb-3">
                 <h2 className="font-display font-bold text-xl text-neutral-900">Promociones</h2>
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-4 -mx-5 px-5 scrollbar-hide">
+            <div className="flex gap-3 overflow-x-auto lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:overflow-visible pb-4 -mx-5 px-5 lg:mx-0 lg:px-0 scrollbar-hide">
                 {promotions.map((promo) => {
                     const isAdding = addingPromoId === promo.id;
                     return (
                         <div 
                             key={promo.id} 
                             onClick={() => onPromoClick(promo)}
-                            className="shrink-0 w-48 rounded-2xl p-4 bg-gradient-to-tr from-primary-500 to-primary-700 text-white shadow-md relative cursor-pointer hover:shadow-lg transition-all"
+                            className="shrink-0 w-48 lg:w-auto rounded-2xl p-4 bg-gradient-to-tr from-primary-500 to-primary-700 text-white shadow-md relative cursor-pointer hover:shadow-lg transition-all"
                         >
                             <div className="flex justify-between items-start mb-2">
                                 <span className="bg-black/30 px-2 py-0.5 rounded text-[10px] font-bold uppercase">

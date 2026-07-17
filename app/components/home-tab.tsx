@@ -44,7 +44,7 @@ export function HomeTab({ onAddToCart, onAddMultipleToCart, cartCount = 0, onChe
                 onSearchClear={actions.clearSearch}
             />
 
-            <div className="max-w-md mx-auto px-5 pt-4">
+            <div className="max-w-md lg:max-w-5xl xl:max-w-6xl mx-auto px-5 lg:px-8 pt-4">
                 {!state.loadingPromos && state.promotions.length > 0 && state.searchQuery === "" && state.selectedCategory === "all" && (
                     <PromoList 
                         promotions={state.promotions}

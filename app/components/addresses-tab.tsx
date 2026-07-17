@@ -103,7 +103,7 @@ export function AddressesTab({ onBack }: AddressesTabProps) {
     }
 
     return (
-        <div className="pb-32 max-w-xl mx-auto w-full animate-in fade-in slide-in-from-right-4 duration-300">
+        <div className="pb-32 lg:pb-8 max-w-xl lg:max-w-2xl mx-auto w-full animate-in fade-in slide-in-from-right-4 duration-300">
             {/* Header */}
             <header className="sticky top-0 z-20 glass border-x-0 border-t-0">
                 <div className="px-6 h-16 flex items-center gap-4">

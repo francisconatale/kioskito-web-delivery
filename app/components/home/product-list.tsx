@@ -41,12 +41,12 @@ export function ProductList({
             ) : products.length === 0 ? (
                 <div className="text-center py-10 text-neutral-500 text-sm">No encontramos productos.</div>
             ) : (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 lg:grid lg:grid-cols-2 xl:grid-cols-3">
                     {products.map((product: any) => {
                         const promo = getPromoForProduct(product.id);
                         return (
-                            <div key={product.id} className="bg-white p-2.5 rounded-2xl flex items-center shadow-sm relative group cursor-pointer hover:shadow-md transition-shadow" onClick={(e) => onAddToCart(product, e as unknown as React.MouseEvent)}>
-                                <div className="w-14 h-14 rounded-xl bg-neutral-100 overflow-hidden shrink-0 flex items-center justify-center relative">
+                            <div key={product.id} className="bg-white p-2.5 lg:p-3 rounded-2xl flex items-center shadow-sm relative group cursor-pointer hover:shadow-md transition-shadow" onClick={(e) => onAddToCart(product, e as unknown as React.MouseEvent)}>
+                                <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-xl bg-neutral-100 overflow-hidden shrink-0 flex items-center justify-center relative">
                                     {product.image ? (
                                         <Image src={product.image} alt={product.nombre} fill className="object-cover" />
                                     ) : (

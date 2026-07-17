@@ -30,7 +30,7 @@ export function AccountTab({ onTabChange }: AccountTabProps) {
 
     if (showSettings) {
         return (
-            <div className="pb-32 max-w-xl mx-auto w-full selection:bg-primary/20 animate-in fade-in duration-300">
+            <div className="pb-32 lg:pb-8 max-w-xl lg:max-w-2xl mx-auto w-full selection:bg-primary/20 animate-in fade-in duration-300">
                 <header className="sticky top-0 z-20 glass border-x-0 border-t-0 lg:hidden">
                     <div className="px-6 h-16 flex items-center gap-3">
                         <button onClick={() => setShowSettings(false)} className="p-1 -ml-1 hover:bg-muted/50 rounded-xl transition-colors">
@@ -77,15 +77,15 @@ export function AccountTab({ onTabChange }: AccountTabProps) {
 
     if (isGuest) {
         return (
-            <div className="pb-32 px-6 flex flex-col items-center justify-center text-center min-h-[80vh] max-w-sm mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="pb-32 lg:pb-8 px-6 flex flex-col items-center justify-center text-center min-h-[80vh] max-w-sm mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="w-24 h-24 bg-primary/10 rounded-[2.5rem] flex items-center justify-center mb-8 rotate-3 shadow-xl shadow-primary/5">
                     <User className="h-12 w-12 text-primary" />
                 </div>
                 <h2 className="text-2xl font-bold tracking-tight mb-3 text-foreground/90">
-                    Tu Espacio <span className="text-primary italic font-medium">Caffres</span>
+                    Accedé a tu cuenta
                 </h2>
                 <p className="text-muted-foreground text-sm font-medium mb-10 leading-relaxed px-4">
-                    Identificate para acceder a tus pedidos, direcciones guardadas y promociones exclusivas.
+                    Iniciá sesión para ver tus pedidos, direcciones guardadas y promociones exclusivas.
                 </p>
                 <div className="w-full space-y-4">
                     <Button
@@ -109,7 +109,7 @@ export function AccountTab({ onTabChange }: AccountTabProps) {
     }
 
     return (
-        <div className="pb-32 max-w-xl mx-auto w-full selection:bg-primary/20 animate-in fade-in duration-300">
+        <div className="pb-32 lg:pb-8 max-w-xl lg:max-w-2xl mx-auto w-full selection:bg-primary/20 animate-in fade-in duration-300">
             {/* Header */}
             <header className="sticky top-0 z-20 glass border-x-0 border-t-0 lg:hidden">
                 <div className="px-6 h-16 flex items-center">

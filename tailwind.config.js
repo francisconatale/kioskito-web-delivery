@@ -74,7 +74,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-body)", "Inter", "sans-serif"],
+        sans: ["var(--font-body)", "Sora", "sans-serif"],
         display: ["var(--font-display)", "Sora", "sans-serif"],
         mono: ["var(--font-mono)", "IBM Plex Mono", "monospace"],
       },

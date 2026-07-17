@@ -1,13 +1,14 @@
-import { Home, ClipboardList, User } from "lucide-react"
+import { Home, ClipboardList, User, Clock } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 export function BottomNav() {
     const pathname = usePathname()
-    const activeTab = pathname === "/pedidos" ? "pedidos" : pathname === "/cuenta" ? "cuenta" : "inicio"
+    const activeTab = pathname === "/pedidos" ? "pedidos" : pathname === "/cuenta" ? "cuenta" : pathname === "/horarios" ? "horarios" : "inicio"
 
     const tabs = [
         { id: "inicio", icon: Home },
+        { id: "horarios", icon: Clock },
         { id: "pedidos", icon: ClipboardList },
         { id: "cuenta", icon: User },
     ]
@@ -15,7 +16,7 @@ export function BottomNav() {
     const activeIndex = tabs.findIndex(t => t.id === activeTab)
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden pointer-events-none flex justify-center">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none flex justify-center lg:hidden">
             <div className="bg-background border-t border-border/50 pb-safe pt-2 flex items-center justify-around pointer-events-auto relative w-full h-16 shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
                 
                 {/* Top Animated Indicator Line */}

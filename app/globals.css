@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=Inter:wght@400;500&family=Sora:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=Sora:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -43,7 +43,7 @@
     --color-error-500:   #D6524A;
 
     --font-display: 'Sora', sans-serif;
-    --font-body: 'Inter', sans-serif;
+    --font-body: 'Sora', sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
 
     --radius-sm: 8px;
