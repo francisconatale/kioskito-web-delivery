@@ -1,9 +1,20 @@
-import { useState } from "react"
-import { CartItem, Product } from "@/lib/data"
+"use client";
+import React, { createContext, useContext, useState } from "react";
+import { CartItem, Product } from "@/lib/data";
 
-export function useAppState() {
-    const [activeTab, setActiveTab] = useState("inicio")
-    const [cart, setCart] = useState<CartItem[]>([])
+interface CartContextType {
+    cart: CartItem[];
+    cartCount: number;
+    handleAddToCart: (product: Product) => void;
+    handleAddMultipleToCart: (items: { product: Product, quantity: number }[]) => void;
+    handleUpdateQuantity: (id: number, delta: number) => void;
+    handleCheckout: () => void;
+}
+
+const CartContext = createContext<CartContextType | undefined>(undefined);
+
+export function CartProvider({ children }: { children: React.ReactNode }) {
+    const [cart, setCart] = useState<CartItem[]>([]);
 
     const handleAddToCart = (product: Product) => {
         setCart((prev) => {
@@ -56,23 +67,29 @@ export function useAppState() {
     }
 
     const handleCheckout = () => {
-        // El CheckoutView ya maneja el aviso de exito, aqui solo limpiamos el carrito
         setCart([])
-        setActiveTab("inicio")
     }
 
     const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
 
-    return {
-        activeTab,
-        setActiveTab,
-        cart,
-        cartCount,
-        handleAddToCart,
-        handleAddMultipleToCart,
-        handleUpdateQuantity,
-        handleCheckout
-    }
+    return (
+        <CartContext.Provider value={{
+            cart,
+            cartCount,
+            handleAddToCart,
+            handleAddMultipleToCart,
+            handleUpdateQuantity,
+            handleCheckout
+        }}>
+            {children}
+        </CartContext.Provider>
+    )
 }
 
-
+export function useCart() {
+    const context = useContext(CartContext);
+    if (context === undefined) {
+        throw new Error("useCart must be used within a CartProvider");
+    }
+    return context;
+}

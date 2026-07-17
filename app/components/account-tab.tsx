@@ -1,6 +1,8 @@
-import { User, ShoppingBag, MapPin, Settings, ChevronRight, LogOut, LogIn, UserPlus } from "lucide-react"
+import { useState } from "react"
+import { Bell, BellOff, User, ShoppingBag, MapPin, Settings, ChevronRight, ChevronLeft, LogOut, LogIn, UserPlus, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/use-auth"
+import { useNotifications } from "@/hooks/use-notifications"
 
 interface AccountTabProps {
     onTabChange: (tab: string) => void
@@ -8,7 +10,70 @@ interface AccountTabProps {
 
 export function AccountTab({ onTabChange }: AccountTabProps) {
     const { user: userInfo, authState, logout: onLogout } = useAuth()
+    const { notificationState, isSubscribed, subscribe, unsubscribe } = useNotifications()
+    const [showSettings, setShowSettings] = useState(false)
+    const [toggling, setToggling] = useState(false)
     const isGuest = authState === "guest"
+
+    const handleToggleNotifications = async () => {
+        setToggling(true)
+        try {
+            if (isSubscribed) {
+                await unsubscribe()
+            } else {
+                await subscribe()
+            }
+        } finally {
+            setToggling(false)
+        }
+    }
+
+    if (showSettings) {
+        return (
+            <div className="pb-32 max-w-xl mx-auto w-full selection:bg-primary/20 animate-in fade-in duration-300">
+                <header className="sticky top-0 z-20 glass border-x-0 border-t-0 lg:hidden">
+                    <div className="px-6 h-16 flex items-center gap-3">
+                        <button onClick={() => setShowSettings(false)} className="p-1 -ml-1 hover:bg-muted/50 rounded-xl transition-colors">
+                            <ChevronLeft className="h-5 w-5 text-muted-foreground" />
+                        </button>
+                        <h1 className="text-lg font-bold tracking-tight">Configuración</h1>
+                    </div>
+                </header>
+
+                <div className="px-4 pt-6 space-y-2">
+                    <div className="flex items-center gap-4 px-4 py-4 rounded-2xl">
+                        <div className={`h-12 w-12 rounded-[1rem] flex items-center justify-center flex-shrink-0 transition-colors ${isSubscribed ? "bg-primary/10 text-primary" : "bg-muted/50 text-muted-foreground"}`}>
+                            {isSubscribed ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm text-foreground/90">Notificaciones Push</h3>
+                            <p className="text-xs text-muted-foreground font-medium mt-0.5">
+                                {notificationState === "denied"
+                                    ? "Permiso denegado — activalo desde el navegador"
+                                    : isSubscribed
+                                        ? "Recibís notificaciones de pedidos y promociones"
+                                        : "Recibí alertas de tus pedidos y ofertas exclusivas"
+                                }
+                            </p>
+                        </div>
+                        {notificationState !== "denied" && (
+                            <button
+                                onClick={handleToggleNotifications}
+                                disabled={toggling || notificationState === "unsupported"}
+                                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 disabled:opacity-50 ${isSubscribed ? "bg-primary" : "bg-muted-foreground/30"}`}
+                            >
+                                {toggling ? (
+                                    <Loader2 className="h-4 w-4 animate-spin mx-auto text-white" />
+                                ) : (
+                                    <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition-transform ${isSubscribed ? "translate-x-6" : "translate-x-1"}`} />
+                                )}
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     if (isGuest) {
         return (
@@ -92,6 +157,7 @@ export function AccountTab({ onTabChange }: AccountTabProps) {
                     icon={<Settings className="h-5 w-5" />}
                     title="Configuración"
                     description="Personalizá tu experiencia"
+                    onClick={() => setShowSettings(true)}
                 />
 
                 <div className="pt-8 px-2">

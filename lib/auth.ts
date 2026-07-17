@@ -24,8 +24,8 @@ export const authService = {
         const data = response.data;
         
         if (data?.token) {
-            sessionStorage.setItem("auth_token", data.token);
-            sessionStorage.setItem("user_info", JSON.stringify(data.user));
+            localStorage.setItem("auth_token", data.token);
+            localStorage.setItem("user_info", JSON.stringify(data.user));
         }
         
         return data;
@@ -37,19 +37,19 @@ export const authService = {
     },
 
     async logout() {
-        sessionStorage.removeItem("auth_token");
-        sessionStorage.removeItem("user_info");
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("user_info");
     },
 
     async validateSession() {
-        const token = sessionStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token");
         if (!token) return null;
 
         try {
             const response = await apiClient.get<UserInfo>("/auth/me");
             const user = response.data;
             if (user) {
-                sessionStorage.setItem("user_info", JSON.stringify(user));
+                localStorage.setItem("user_info", JSON.stringify(user));
             }
             return user;
         } catch (error) {
@@ -60,12 +60,12 @@ export const authService = {
     },
 
     getToken() {
-        return typeof window !== 'undefined' ? sessionStorage.getItem("auth_token") : null;
+        return typeof window !== 'undefined' ? localStorage.getItem("auth_token") : null;
     },
 
     getUserInfo(): UserInfo | null {
         if (typeof window === 'undefined') return null;
-        const info = sessionStorage.getItem("user_info");
+        const info = localStorage.getItem("user_info");
         return info ? JSON.parse(info) : null;
     },
 

@@ -83,7 +83,7 @@ export async function handleResponse(response: Response, options: { silent?: boo
 }
 
 export function getAuthHeaders(contentType: string = "application/json") {
-    const token = typeof window !== 'undefined' ? sessionStorage.getItem("auth_token") : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem("auth_token") : null;
     return {
         ...(contentType && { "Content-Type": contentType }),
         ...(token && { "Authorization": `Bearer ${token}` })

@@ -1,13 +1,12 @@
 import { Home, User, LogOut, LogIn, ClipboardList } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
-export function DesktopSidebar({
-    activeTab,
-    onTabChange
-}: {
-    activeTab: string
-    onTabChange: (tab: string) => void
-}) {
+export function DesktopSidebar() {
+    const pathname = usePathname()
+    const activeTab = pathname === "/pedidos" ? "pedidos" : pathname === "/cuenta" ? "cuenta" : "inicio"
+    
     const { authState, logout: onLogout } = useAuth()
     const isGuest = authState === "guest"
     return (
@@ -20,8 +19,8 @@ export function DesktopSidebar({
             </div>
 
             <nav className="flex-1 p-4 space-y-1">
-                <button
-                    onClick={() => onTabChange("inicio")}
+                <Link
+                    href="/"
                     className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                         activeTab === "inicio" 
                             ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
@@ -30,10 +29,10 @@ export function DesktopSidebar({
                 >
                     <Home className={`h-4 w-4 ${activeTab === "inicio" ? "fill-primary-foreground/20" : ""}`} />
                     Inicio
-                </button>
+                </Link>
 
-                <button
-                    onClick={() => onTabChange("pedidos")}
+                <Link
+                    href="/pedidos"
                     className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                         activeTab === "pedidos" 
                             ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
@@ -42,10 +41,10 @@ export function DesktopSidebar({
                 >
                     <ClipboardList className={`h-4 w-4 ${activeTab === "pedidos" ? "fill-primary-foreground/20" : ""}`} />
                     Mis Pedidos
-                </button>
+                </Link>
 
-                <button
-                    onClick={() => onTabChange("cuenta")}
+                <Link
+                    href="/cuenta"
                     className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                         activeTab === "cuenta" 
                             ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
@@ -54,7 +53,7 @@ export function DesktopSidebar({
                 >
                     <User className={`h-4 w-4 ${activeTab === "cuenta" ? "fill-primary-foreground/20" : ""}`} />
                     Cuenta
-                </button>
+                </Link>
             </nav>
 
             <div className="p-4 border-t border-border/50">

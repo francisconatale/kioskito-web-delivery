@@ -1,11 +1,11 @@
 import { Home, ClipboardList, User } from "lucide-react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
-interface BottomNavProps {
-    activeTab: string
-    onTabChange: (tab: string) => void
-}
+export function BottomNav() {
+    const pathname = usePathname()
+    const activeTab = pathname === "/pedidos" ? "pedidos" : pathname === "/cuenta" ? "cuenta" : "inicio"
 
-export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
     const tabs = [
         { id: "inicio", icon: Home },
         { id: "pedidos", icon: ClipboardList },
@@ -30,14 +30,14 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
                     const isActive = activeTab === tab.id
 
                     return (
-                        <button
+                        <Link
                             key={tab.id}
-                            onClick={() => onTabChange(tab.id)}
+                            href={tab.id === 'inicio' ? '/' : `/${tab.id}`}
                             className={`flex-1 flex flex-col items-center justify-center h-full relative z-10 transition-colors tap-highlight-transparent ${isActive ? 'text-blue-600 dark:text-blue-500' : 'text-muted-foreground hover:text-foreground'}`}
                             style={{ WebkitTapHighlightColor: 'transparent' }}
                         >
                             <Icon className={`w-6 h-6 transition-all duration-300 ${isActive ? 'scale-110' : ''}`} />
-                        </button>
+                        </Link>
                     )
                 })}
             </div>

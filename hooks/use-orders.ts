@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { apiClient, isOfflineError } from "@/lib/api-client";
+import { useAuth } from "@/hooks/use-auth";
 
 export interface OrderItem {
     id: number;
@@ -39,6 +40,7 @@ interface PaginatedResponse {
 const PAGE_SIZE = 10;
 
 export function useOrders() {
+    const { authState, isResolvingAuth } = useAuth();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -53,8 +55,7 @@ export function useOrders() {
             setLoading(true);
             setError(null);
 
-            const token = typeof window !== 'undefined' ? sessionStorage.getItem("auth_token") : null;
-            if (!token) {
+            if (authState !== "authenticated") {
                 setOrders([]);
                 setLoading(false);
                 return;
@@ -92,11 +93,13 @@ export function useOrders() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [authState]);
 
     useEffect(() => {
-        fetchOrders(0);
-    }, [fetchOrders]);
+        if (!isResolvingAuth) {
+            fetchOrders(0);
+        }
+    }, [isResolvingAuth, authState, fetchOrders]);
 
     const goToPage = useCallback((targetPage: number) => {
         fetchOrders(targetPage);
