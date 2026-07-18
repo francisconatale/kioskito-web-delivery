@@ -104,8 +104,18 @@ export default function ProductosDeliveryPage() {
   const fetchPosProductsFiltered = async (searchStr: string, categoryId: string, page = 0, append = false) => {
     try {
       if (!append) setPosLoading(true);
-      const params: any = { negocioId: NEGOCIO_ID, size: 20, page: page };
-      if (categoryId) params.categoria = categoryId;
+      const params: any = { negocioId: NEGOCIO_ID };
+      
+      if (categoryId) {
+        // When a category is selected, fetch ALL products at once
+        params.categoria = categoryId;
+        params.size = 9999;
+      } else {
+        // When no category, use incremental pagination
+        params.size = 20;
+        params.page = page;
+      }
+      
       if (searchStr.length > 2) params.q = searchStr;
 
       // We use /productos as it supports both q and categoria
@@ -118,7 +128,11 @@ export default function ProductosDeliveryPage() {
         setPosProducts(newItems);
       }
       
-      setHasMorePos(newItems.length >= 20);
+      if (categoryId) {
+        setHasMorePos(false); // All products loaded when category is selected
+      } else {
+        setHasMorePos(newItems.length >= 20);
+      }
       setPosPage(page);
     } catch (err) {} finally {
       if (!append) setPosLoading(false);
@@ -142,7 +156,8 @@ export default function ProductosDeliveryPage() {
   const handleScrollPos = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
     if (scrollHeight - scrollTop <= clientHeight + 50) {
-      if (hasMorePos && !posLoading && !isAppendingPos) {
+      // Only load more when no category is selected (incremental mode)
+      if (!selectedPosCategory && hasMorePos && !posLoading && !isAppendingPos) {
         loadMorePosProducts();
       }
     }
